@@ -1,0 +1,55 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Background Glow -->
+    <path
+        android:pathData="M60,60 m-55,0 a55,55 0 1,0 110,0 a55,55 0 1,0 -110,0"
+        android:fillColor="#1AFF5A16" />
+
+    <!-- Main Circle -->
+    <path
+        android:pathData="M60,60 m-45,0 a45,45 0 1,0 90,0 a45,45 0 1,0 -90,0"
+        android:fillColor="#FF5A16" />
+
+    <!-- Logo Elements (White) -->
+    <!-- Scanner Frame -->
+    <path
+        android:pathData="M48,40 H40 V48 M72,40 H80 V48 M80,72 V80 H72 M48,80 H40 V72"
+        android:strokeWidth="3"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Stylized 'N' -->
+    <path
+        android:pathData="M50,70 V50 L70,70 V50"
+        android:strokeWidth="6"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Leaf -->
+    <path
+        android:pathData="M70,50 C70,42 78,38 82,42"
+        android:strokeWidth="3"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- Decorative Stars/Sparkles -->
+    <path
+        android:pathData="M95,35 L97,37 M97,35 L95,37"
+        android:strokeWidth="2"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M25,85 L27,87 M27,85 L25,87"
+        android:strokeWidth="2"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+
+</vector>

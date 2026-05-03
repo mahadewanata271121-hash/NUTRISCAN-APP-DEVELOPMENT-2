@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_home_abstract"
+    android:fitsSystemWindows="true"
+    tools:context=".HomeActivity">
+
+    <ScrollView
+        android:id="@+id/scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="180dp">
+
+            <!-- Header -->
+            <ImageView
+                android:id="@+id/user_avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="24dp"
+                android:contentDescription="@string/cd_user_avatar"
+                android:src="@drawable/person"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="@color/black_deep"/>
+
+            <TextView
+                android:id="@+id/greeting_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:fontFamily="@font/spacelight"
+                android:text="@string/greeting_default"
+                android:textColor="@color/black_deep"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toEndOf="@+id/user_avatar"
+                app:layout_constraintTop_toTopOf="@+id/user_avatar"
+                app:layout_constraintBottom_toBottomOf="@+id/user_avatar" />
+
+            <ImageView
+                android:id="@+id/notification_icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="24dp"
+                android:contentDescription="@string/cd_notification"
+                android:src="@drawable/lonceng_notif"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/user_avatar"
+                app:layout_constraintBottom_toBottomOf="@+id/user_avatar"
+                app:tint="@color/black_deep" />
+
+            <!-- Date Card with Day Progress -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/date_card"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="24dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:layout_constraintTop_toBottomOf="@+id/user_avatar"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingTop="12dp"
+                    android:paddingBottom="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingEnd="16dp">
+
+                        <TextView
+                            android:id="@+id/tv_month_year"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:fontFamily="@font/spacelight"
+                            android:textColor="@color/black_deep"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            tools:text="Januari 2026" />
+
+                        <ProgressBar
+                            android:id="@+id/day_progress_bar"
+                            style="@android:style/Widget.ProgressBar.Horizontal"
+                            android:layout_width="0dp"
+                            android:layout_height="6dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="12dp"
+                            android:progress="0"
+                            android:max="1440"
+                            android:progressDrawable="@drawable/custom_day_progress" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/date_recycler_view"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_gravity="center_horizontal"
+                        android:orientation="horizontal"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        tools:itemCount="7"
+                        tools:listitem="@layout/date_item_layout" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Calories Section -->
+            <TextView
+                android:id="@+id/kalori_harian_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="24dp"
+                android:fontFamily="@font/spacelight"
+                android:text="@string/title_daily_calories"
+                android:textColor="@color/black_deep"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/date_card" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/calories_card"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="24dp"
+                app:cardBackgroundColor="@color/card_calories_bg"
+                app:cardCornerRadius="20dp"
+                app:layout_constraintTop_toBottomOf="@+id/kalori_harian_title"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:strokeWidth="0dp">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:id="@+id/total_kalori_label"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/spacelight"
+                        android:text="@string/label_total_calories"
+                        android:textStyle="bold"
+                        android:textColor="@color/card_calories_text"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <FrameLayout
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:background="@drawable/circle_background_grey"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+                        <ImageView
+                            android:layout_width="match_parent"
+                            android:layout_height="34dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/settingkalori"
+                            app:tint="@color/card_calories_text" />
+                    </FrameLayout>
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/progress_container"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:layout_marginTop="16dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/total_kalori_label">
+
+                        <com.mikhaellopez.circularprogressbar.CircularProgressBar
+                            android:id="@+id/calories_progress_bar"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            app:cpb_background_progressbar_color="@color/card_calories_progress_bg"
+                            app:cpb_background_progressbar_width="14dp"
+                            app:cpb_progressbar_color="@color/card_calories_text"
+                            app:cpb_progressbar_width="14dp"
+                            app:cpb_progress="0"
+                            app:cpb_progress_max="2000"
+                            app:cpb_round_border="true"
+                            app:cpb_start_angle="225" />
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:alpha="0.2"
+                            android:background="@drawable/custom_progress_bar_dash" />
+
+                        <TextView
+                            android:id="@+id/min_calories_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:fontFamily="@font/spacelight"
+                            android:text="0"
+                            android:textColor="@color/card_calories_text"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintStart_toStartOf="parent" />
+
+                        <TextView
+                            android:id="@+id/max_calories_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="10dp"
+                            android:fontFamily="@font/spacelight"
+                            android:text="2000"
+                            android:textColor="@color/card_calories_text"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+                            <TextView
+                                android:id="@+id/calories_text"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textColor="@color/card_calories_text"
+                                android:textSize="32sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/tv_calories_unit"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Kalori"
+                                android:textColor="@color/card_calories_text"
+                                android:textSize="14sp" />
+                        </LinearLayout>
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <ImageView
+                        android:id="@+id/btn_reset_calories"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginTop="8dp"
+                        android:src="@drawable/ic_history_outline"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:tint="@color/card_calories_text" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Nutrients Grid -->
+            <GridLayout
+                android:id="@+id/nutrients_grid"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:columnCount="2"
+                android:rowCount="1"
+                app:layout_constraintTop_toBottomOf="@+id/calories_card"
+                app:layout_constraintStart_toStartOf="@+id/calories_card"
+                app:layout_constraintEnd_toEndOf="@+id/calories_card">
+
+                <!-- Carbs Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/carbs_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginEnd="8dp"
+                    app:cardBackgroundColor="@color/card_carbs_bg"
+                    app:cardCornerRadius="20dp"
+                    app:strokeWidth="0dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp">
+
+                        <FrameLayout
+                            android:id="@+id/carbs_icon_container"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/circle_background_grey"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/karbo"
+                                app:tint="@color/card_carbs_text" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/carbs_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:fontFamily="@font/spacelight"
+                            android:text="Karbohidrat"
+                            android:textColor="@color/card_carbs_text"
+                            android:textStyle="bold"
+                            app:layout_constraintTop_toBottomOf="@+id/carbs_icon_container"
+                            app:layout_constraintStart_toStartOf="parent" />
+
+                        <ProgressBar
+                            android:id="@+id/carbs_progress"
+                            style="@android:style/Widget.ProgressBar.Horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="10dp"
+                            android:layout_marginTop="8dp"
+                            android:progress="0"
+                            android:progressDrawable="@drawable/custom_progress_bar_yellow"
+                            app:layout_constraintTop_toBottomOf="@+id/carbs_label" />
+
+                        <TextView
+                            android:id="@+id/carbs_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="0g / 0g"
+                            android:textColor="@color/card_carbs_text"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            app:layout_constraintTop_toBottomOf="@+id/carbs_progress"
+                            app:layout_constraintStart_toStartOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Protein Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/protein_card"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginStart="8dp"
+                    app:cardBackgroundColor="@color/card_protein_bg"
+                    app:cardCornerRadius="20dp"
+                    app:strokeWidth="0dp">
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp">
+
+                        <FrameLayout
+                            android:id="@+id/protein_icon_container"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/circle_background_grey"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toStartOf="parent">
+                            <ImageView
+                                android:layout_width="22dp"
+                                android:layout_height="22dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/protein"
+                                app:tint="@color/card_protein_text" />
+                        </FrameLayout>
+
+                        <TextView
+                            android:id="@+id/protein_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:fontFamily="@font/spacelight"
+                            android:text="Protein"
+                            android:textColor="@color/card_protein_text"
+                            android:textStyle="bold"
+                            app:layout_constraintTop_toBottomOf="@+id/protein_icon_container"
+                            app:layout_constraintStart_toStartOf="parent" />
+
+                        <ProgressBar
+                            android:id="@+id/protein_progress"
+                            style="@android:style/Widget.ProgressBar.Horizontal"
+                            android:layout_width="match_parent"
+                            android:layout_height="10dp"
+                            android:layout_marginTop="8dp"
+                            android:progress="0"
+                            android:progressDrawable="@drawable/custom_progress_bar_green"
+                            app:layout_constraintTop_toBottomOf="@+id/protein_label" />
+
+                        <TextView
+                            android:id="@+id/protein_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="0g / 0g"
+                            android:textColor="@color/card_protein_text"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            app:layout_constraintTop_toBottomOf="@+id/protein_progress"
+                            app:layout_constraintStart_toStartOf="parent" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </GridLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_reset_experiment"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:background="@drawable/reset_button_background"
+                android:text="Reset Data Nutrisi Kamu"
+                android:textAllCaps="false"
+                android:textColor="@color/orange_primary"
+                android:textStyle="bold"
+                app:backgroundTint="@null"
+                app:cornerRadius="25dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/nutrients_grid"
+                app:strokeWidth="0dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+    <!-- Navigation Menu Container -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/bottom_navigation_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="110dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="35dp"
+        app:cardElevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:strokeWidth="0dp">
+
+        <LinearLayout
+            android:layout_width="288dp"
+            android:layout_height="53dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp">
+
+            <ImageView
+                android:id="@+id/nav_home_icon"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/nav_item_background_selector"
+                android:contentDescription="Home"
+                android:padding="10dp"
+                android:src="@drawable/home"
+                app:tint="@color/nav_icon_color_selector" />
+
+            <ImageView
+                android:id="@+id/nav_ai_icon"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/nav_item_background_selector"
+                android:contentDescription="Scan"
+                android:padding="10dp"
+                android:src="@drawable/scan"
+                app:tint="@color/nav_icon_color_selector" />
+
+            <ImageView
+                android:id="@+id/nav_scan_icon"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/nav_item_background_selector"
+                android:contentDescription="History"
+                android:padding="10dp"
+                android:src="@drawable/statisktik"
+                app:tint="@color/nav_icon_color_selector" />
+
+            <ImageView
+                android:id="@+id/nav_history_icon"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/nav_item_background_selector"
+                android:contentDescription="Education"
+                android:padding="10dp"
+                android:src="@drawable/edukasi"
+                app:tint="@color/nav_icon_color_selector" />
+
+            <ImageView
+                android:id="@+id/nav_settings_icon"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_marginHorizontal="3dp"
+                android:background="@drawable/nav_item_background_selector"
+                android:contentDescription="Settings"
+                android:padding="10dp"
+                android:src="@drawable/settings"
+                app:tint="@color/nav_icon_color_selector" />
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

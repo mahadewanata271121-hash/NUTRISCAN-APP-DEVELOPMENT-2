@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- Menggunakan warna oranye yang segar -->
+    <solid android:color="#FF5A16" />
+    <!-- Radius kecil agar berbentuk kotak dengan sudut tumpul (modern) -->
+    <corners android:radius="12dp" />
+</shape>

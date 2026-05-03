@@ -1,0 +1,35 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Soft background circle accent -->
+    <path
+        android:pathData="M60,60 m-50,0 a50,50 0 1,0 100,0 a50,50 0 1,0 -100,0"
+        android:fillColor="#FFF2ED" />
+
+    <!-- Scanner Brackets (Professional Tech Look) -->
+    <path
+        android:pathData="M45,30 H30 V45 M75,30 H90 V45 M90,75 V90 H75 M45,90 H30 V75"
+        android:strokeWidth="6"
+        android:strokeColor="#FF5A16"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Stylized 'N' + Scan Path Concept -->
+    <path
+        android:pathData="M45,75 V45 L75,75 V45"
+        android:strokeWidth="10"
+        android:strokeColor="#FF5A16"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Organic Element: Leaf sprouting from the tech path -->
+    <path
+        android:pathData="M75,45 C75,35 85,30 90,35"
+        android:strokeWidth="5"
+        android:strokeColor="#FF5A16"
+        android:strokeLineCap="round" />
+
+</vector>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_home_abstract"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp"
+        android:background="#E0E0E0" />
+
+    <ImageView
+        android:id="@+id/iv_tutorial_icon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/ic_welcome_tutorial" />
+
+    <TextView
+        android:id="@+id/tv_tutorial_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/spacelight"
+        android:text="Selamat Datang di Nutriscan"
+        android:textAlignment="center"
+        android:textColor="@color/black_deep"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tv_tutorial_desc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:fontFamily="@font/spacelight"
+        android:text="Kami sangat menghargai kepercayaan Anda. Mari kenali fitur-fitur yang akan membantu perjalanan kesehatan Anda."
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="15sp"
+        android:lineSpacingExtra="4dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_tutorial_next"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginTop="32dp"
+        android:text="Lanjutkan"
+        android:textAllCaps="false"
+        android:textStyle="bold"
+        android:fontFamily="@font/spacelight"
+        android:textColor="@color/white"
+        app:backgroundTint="#000000"
+        app:cornerRadius="16dp" />
+
+    <TextView
+        android:id="@+id/btn_tutorial_skip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:padding="8dp"
+        android:text="Lewati Pengenalan"
+        android:textColor="#FF5A16"
+        android:fontFamily="@font/spacelight"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

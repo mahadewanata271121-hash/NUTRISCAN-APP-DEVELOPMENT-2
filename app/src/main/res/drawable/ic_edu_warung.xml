@@ -1,0 +1,18 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Steaming Bowl - Universal Culinary Icon 1.5dp -->
+    <path
+        android:pathData="M2,12c0,0 2,8 10,8s10,-8 10,-8H2z"
+        android:strokeColor="#C2185B"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+    <path
+        android:pathData="M7,8c0,0 1,-2 1,-3M12,8c0,0 1,-2 1,-3M17,8c0,0 1,-2 1,-3"
+        android:strokeColor="#C2185B"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"/>
+</vector>

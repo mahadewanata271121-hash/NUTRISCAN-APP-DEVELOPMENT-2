@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Warna ikon saat item dipilih (putih) -->
+    <item android:state_selected="true" android:color="@color/white" />
+
+    <!-- Warna ikon default (abu-abu) -->
+    <item android:color="#000000" />
+
+</selector>

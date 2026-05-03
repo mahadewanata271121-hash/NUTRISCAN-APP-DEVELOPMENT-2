@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Nutriscan</string>
+    <string name="next_button">Next</string>
+    <string name="get_started">Get Started</string>
+    <string name="skip_button">Lewati</string>
+    <!-- ID ini adalah placeholder agar tidak error. Ganti dengan yang asli dari google-services.json nanti -->
+    <string name="default_web_client_id">1093725181462-dummy.apps.googleusercontent.com</string>
+
+    <!-- Onboarding & Main -->
+    <string name="onboarding_title">Partner Cerdas Nutrisi Sehat</string>
+    <string name="onboarding_desc">Lacak makananmu, pantau nutrisi, dan capai tujuan kesehatanmu dengan dukungan AI.</string>
+    <string name="main_tagline">Kenali Gizi, Perbaiki Pola Makan</string>
+    <string name="welcome_back">Selamat Datang Kembali!</string>
+    <string name="welcome_title">Selamat Datang!</string>
+    <string name="title_app_name">NutriScan</string>
+    <string name="title_journey">Perjalanan Kesehatan Anda\nDimulai di Sini</string>
+    <string name="desc_journey">Kami membantu Anda memilih makanan yang lebih sehat dan menikmati hidangan lezat serta bergizi.</string>
+
+    <!-- Auth & Register -->
+    <string name="title_create_account">Buat Akun Baru</string>
+    <string name="btn_register_now">Daftar Sekarang</string>
+    <string name="label_email">Email</string>
+    <string name="label_password">Password</string>
+    <string name="label_full_name">Nama Lengkap</string>
+    <string name="label_username">Nama Pengguna</string>
+    <string name="hint_email">Masukkan email Anda</string>
+    <string name="hint_username">Masukkan Nama Pengguna</string>
+    <string name="hint_password">Masukkan password</string>
+    <string name="btn_login">Masuk</string>
+    <string name="btn_register">Daftar</string>
+    <string name="label_or">Atau</string>
+    <string name="btn_google_login">Google</string>
+    <string name="label_forgot_password">Lupa Password?</string>
+    <string name="label_no_account">Belum punya akun? </string>
+    <string name="label_have_account">Sudah punya akun? Masuk</string>
+    <string name="error_auth_failed">Silakan periksa kembali email dan password Anda.</string>
+    <string name="error_email_empty">Email tidak boleh kosong</string>
+    <string name="error_password_empty">Password tidak boleh kosong</string>
+    <string name="error_username_empty">Username tidak boleh kosong</string>
+    <string name="error_password_mismatch">Password tidak cocok</string>
+    <string name="error_invalid_email">Silakan masukkan email yang valid</string>
+    <string name="msg_reset_password_desc">Masukkan email akun Anda untuk menerima link reset password.</string>
+    <string name="btn_send">Kirim</string>
+    <string name="btn_cancel">Batal</string>
+
+    <!-- Home Activity -->
+    <string name="greeting_template">Selamat Pagi %s!</string>
+    <string name="greeting_default">Selamat Pagi Dewa!</string>
+    <string name="title_daily_calories">Kalori Harian Anda</string>
+    <string name="label_total_calories">Total Kalori</string>
+    <string name="label_calories">Kalori</string>
+    <string name="value_zero">0</string>
+    <string name="value_default_max_cal">2000</string>
+    <string name="value_default_current_cal">1350</string>
+    <string name="label_carbs">Karbohidrat</string>
+    <string name="value_default_carbs">140g</string>
+    <string name="label_protein">Protein</string>
+    <string name="value_default_protein">60g</string>
+    <string name="label_fat">Lemak</string>
+    <string name="value_default_fat">45g</string>
+    <string name="btn_reset_cal_desc">Reset Kalori</string>
+    <string name="label_reset_nutrients">Reset Data Nutrisi Kamu</string>
+
+    <!-- Education Activity -->
+    <string name="title_education">Edukasi Gizi</string>
+    <string name="section_tips_today">Tips Hari Ini</string>
+    <string name="tag_nutrisi_dasar">NUTRISI DASAR</string>
+    <string name="featured_protein_title">Kenapa Protein Penting\nuntuk Otot?</string>
+    <string name="btn_read_2_min">Baca 2 Menit</string>
+    <string name="section_mitos_fakta">Mitos vs Fakta</string>
+    <string name="title_mitos_malam">Makan Malam</string>
+    <string name="subtitle_mitos_malam">Bikin Gemuk?</string>
+    <string name="title_mitos_gula">Gula vs Lemak</string>
+    <string name="subtitle_mitos_gula">Mana musuh asli?</string>
+    <string name="section_panduan_pintar">Panduan Pintar Nutriscan</string>
+    <string name="title_porsi_tangan">Porsi Tangan</string>
+    <string name="subtitle_porsi_tangan">Timbangan alami</string>
+    <string name="title_tips_warung">Tips Warung</string>
+    <string name="subtitle_tips_warung">Tetap sehat di luar</string>
+    <string name="title_tips_scan">Tips Scan</string>
+    <string name="subtitle_tips_scan">Hasil AI maksimal</string>
+    <string name="section_eksplorasi_tips">Eksplorasi Tips</string>
+    <string name="title_defisit_kalori">Defisit Kalori</string>
+    <string name="desc_defisit_kalori">Kunci turun berat badan efektif.</string>
+    <string name="title_karbo_tips">Karbo Baik vs Buruk</string>
+    <string name="desc_karbo_tips">Kenali jenis karbohidrat harianmu.</string>
+    <string name="title_superfood">Superfood Indonesia</string>
+    <string name="desc_superfood">Bahan lokal murah nutrisi dunia.</string>
+    <string name="label_skip_intro">Lewati Pengenalan</string>
+    <string name="label_continue">Lanjutkan</string>
+    <string name="welcome_nutriscan">Selamat Datang di Nutriscan</string>
+    <string name="welcome_nutriscan_desc">Kami sangat menghargai kepercayaan Anda. Mari kenali fitur-fitur yang akan membantu pola makan Anda.</string>
+
+    <!-- ARTICLE CONTENT RESOURCES -->
+    <string name="label_tips_penting">💡 Tips Penting</string>
+    <string name="label_fakta_menarik">💡 Fakta Menarik</string>
+    <string name="label_tips_praktis">💡 Tips Praktis</string>
+    <string name="btn_understand">Saya Mengerti</string>
+    <string name="btn_paham">Bagus, Saya Paham!</string>
+    <string name="btn_ready_scan">Siap Scan!</string>
+    <string name="btn_ready_karbo">Siap Pilih Karbo Baik!</string>
+    <string name="btn_ready_eat_healthy">Siap Makan Sehat!</string>
+    <string name="btn_love_local">Cintai Produk Lokal!</string>
+    <string name="tag_diet_berat_badan">DIET &amp; BERAT BADAN</string>
+    <string name="tag_kearifan_lokal">KEARIFAN LOKAL</string>
+    <string name="tag_tips_makan_luar">TIPS MAKAN LUAR</string>
+
+    <!-- Detailed Article Content -->
+    <string name="art_protein_title">Kenapa Protein Penting untuk Otot?</string>
+    <string name="art_protein_desc">Protein adalah zat gizi makro yang berperan sebagai unit pembangun utama dalam tubuh manusia. Tanpa asupan protein yang memadai, proses perbaikan jaringan otot yang mengalami kerusakan mikro setelah aktivitas sehari-hari atau olahraga akan terhambat secara signifikan.</string>
+    <string name="art_protein_role_label">Peran Vital Protein bagi Otot Anda:</string>
+    <string name="art_protein_role_desc">• Memperbaiki mikrotrauma (sobekan kecil) pada serat otot setelah Anda melakukan aktivitas fisik yang intens.\n• Mendukung pembentukan massa otot baru melalui proses sintesis protein otot.\n• Menjaga kepadatan tulang dan meningkatkan sistem daya tahan tubuh secara keseluruhan.\n• Memberikan rasa kenyang lebih lama karena memiliki efek termik pangan yang tinggi.</string>
+    <string name="art_protein_tips">Pastikan Anda memenuhi kebutuhan protein harian sekitar 0.8g &#8211; 1.2g per kg berat badan. Cobalah untuk menyebarkan asupan protein Anda secara merata dalam setiap jam makan untuk proses penyerapan nutrisi yang lebih optimal bagi tubuh.</string>
+
+    <string name="art_defisit_title">Apa itu Defisit Kalori secara Mendalam?</string>
+    <string name="art_defisit_desc">Secara biologis, defisit kalori terjadi ketika tubuh Anda membakar lebih banyak energi untuk beraktivitas dibandingkan dengan energi yang masuk dari makanan. Dalam kondisi ini, tubuh terpaksa menggunakan cadangan energi berupa lemak tubuh, sehingga berat badan Anda akan menurun secara bertahap.</string>
+    <string name="art_defisit_example_label">Contoh Simulasi Sederhana:</string>
+    <string name="art_defisit_example_desc">Jika kebutuhan pemeliharaan harian Anda adalah 2000 kkal, namun Anda hanya mengonsumsi 1700 kkal, maka Anda sedang berada dalam kondisi defisit sebesar 300 kkal per hari.</string>
+    <string name="art_defisit_method_label">Metode Efektif Mencapai Defisit:</string>
+    <string name="art_defisit_method_desc">• Mengurangi porsi makan secara bertahap tanpa menghilangkan gizi.\n• Memilih jenis makanan yang memiliki densitas kalori rendah namun volume tinggi.\n• Meningkatkan pengeluaran energi melalui aktivitas fisik dan olahraga teratur.</string>
+    <string name="art_defisit_tips">Penurunan berat badan yang dinilai sehat secara klinis biasanya berkisar antara 0.5 &#8211; 1 kg per minggu. Hindari melakukan diet ekstrem yang memotong kalori terlalu tajam karena dapat mengganggu metabolisme tubuh Anda.</string>
+
+    <string name="art_karbo_title">Mengenal Karbohidrat Baik vs Karbohidrat Buruk</string>
+    <string name="art_karbo_desc">Karbohidrat adalah sumber bahan bakar utama bagi otak dan otot. Namun, tidak semua karbohidrat diciptakan sama. Karbohidrat kompleks dicerna lebih lambat sehingga menyediakan aliran energi yang stabil, sementara karbohidrat sederhana lebih cepat diserap dan sering memicu lonjakan gula darah mendadak.</string>
+    <string name="art_karbo_example_label">Contoh Sumber Karbohidrat:</string>
+    <string name="art_karbo_example_desc">• Karbohidrat Baik (Kompleks): Beras merah, oatmeal, kentang dengan kulit, ubi jalar, jagung, dan roti gandum utuh.\n• Karbohidrat Kurang Baik (Sederhana): Minuman manis, permen, kue kering, sirup, dan roti putih olahan.</string>
+    <string name="art_karbo_choose_label">Panduan Memilih Karbohidrat:</string>
+    <string name="art_karbo_choose_desc">• Prioritaskan karbohidrat yang masih mengandung serat alami (minim proses).\n• Perbanyak konsumsi sayuran dan biji-bijian sebagai sumber serat tambahan.\n• Batasi makanan yang mengandung banyak gula tambahan tersembunyi.</string>
+    <string name="art_karbo_tips">Anda tidak perlu menghindari karbohidrat sepenuhnya. Kuncinya adalah memilih karbohidrat kompleks agar energi Anda tetap stabil sepanjang hari dan rasa kenyang bertahan jauh lebih lama.</string>
+
+    <string name="art_mitos_malam_title">Apakah Makan Malam Benar-benar Bikin Gemuk?</string>
+    <string name="art_mitos_malam_desc">Banyak anggapan populer menyatakan bahwa makan di atas jam 7 malam secara otomatis akan diubah menjadi lemak karena metabolisme melambat saat tidur. Namun, penelitian gizi klinis modern menunjukkan fakta yang berbeda mengenai manajemen berat badan.</string>
+    <string name="art_mitos_malam_fact_label">Penjelasan Medis (Berdasarkan Panduan Kemenkes):</string>
+    <string name="art_mitos_malam_fact_desc">Kenaikan berat badan sebenarnya ditentukan oleh total akumulasi kalori yang masuk dibandingkan kalori yang keluar dalam siklus 24 jam. Selama total kalori harian Anda tidak melebihi kebutuhan, makan malam tidak akan langsung membuat Anda gemuk. Masalah sebenarnya seringkali terletak pada pemilihan jenis makanan yang tinggi lemak atau gula saat malam hari serta porsi yang cenderung berlebihan.</string>
+    <string name="art_mitos_malam_tips">Sangat disarankan untuk memberikan jeda minimal 2 &#8211; 3 jam antara waktu makan malam dan waktu tidur. Hal ini penting untuk mencegah gangguan pencernaan, penyakit asam lambung (GERD), dan menjaga kualitas tidur Anda tetap prima.</string>
+
+    <string name="art_mitos_gula_title">Gula vs Lemak: Siapa Musuh Kesehatan yang Sebenarnya?</string>
+    <string name="art_mitos_gula_desc">Selama berpuluh-puluh tahun lemak sering disalahkan atas masalah kegemukan. Namun, bukti ilmiah terbaru menunjukkan bahwa konsumsi gula tambahan secara berlebihan (refined sugar) justru menjadi pendorong utama sindrom metabolik di era modern.</string>
+    <string name="art_mitos_gula_fact_label">Fakta Nutrisi yang Harus Diketahui:</string>
+    <string name="art_mitos_gula_fact_desc">Konsumsi gula berlebih memicu lonjakan hormon insulin dengan sangat cepat. Kadar insulin yang tinggi terus-menerus memberi sinyal pada tubuh untuk menyimpan lemak, terutama di area perut. Sebaliknya, lemak sehat seperti dari alpukat atau ikan justru membantu memberikan rasa kenyang lebih lama dan mendukung fungsi otak serta penyerapan vitamin.</string>
+    <string name="art_mitos_gula_tips">Jadilah konsumen cerdas dengan memperhatikan label nutrisi! Gula seringkali tersembunyi dengan nama lain yang asing seperti sukrosa, sirup jagung fruktosa tinggi (HFCS), maltodekstrin, atau dekstrosa.</string>
+
+    <string name="art_porsi_title">Panduan Mengukur Porsi Makan dengan Tangan</string>
+    <string name="art_porsi_desc">Mengikuti konsep \'Isi Piringku\' dari Kemenkes RI, Anda dapat mengestimasi kebutuhan gizi harian secara praktis menggunakan ukuran tangan Anda sendiri. Metode ini sangat memudahkan Anda yang tidak ingin repot menggunakan timbangan digital setiap kali makan.</string>
+    <string name="art_porsi_guide_label">Visualisasi Ukuran Porsi:</string>
+    <string name="art_porsi_guide_desc">• Karbohidrat: Seukuran satu kepalan tangan tertutup (misalnya untuk Nasi, Ubi, atau Jagung).\n• Protein: Seukuran satu telapak tangan Anda (misalnya untuk Ayam, Ikan, Daging, atau Tempe).\n• Sayuran: Seukuran dua telapak tangan yang terbuka lebar (prioritaskan sayuran hijau atau tumisan).\n• Lemak: Seukuran satu jempol tangan Anda (untuk penggunaan Minyak, Mentega, atau Kacang-kacangan).</string>
+    <string name="art_porsi_tips">Metode ini dinilai cukup akurat karena ukuran tangan seseorang biasanya cenderung proporsional dengan kebutuhan energi dan ukuran tubuh individu tersebut masing-masing.</string>
+
+    <string name="art_warung_title">Tetap Sehat di Warteg &amp; Padang</string>
+    <string name="art_warung_desc">Makan di luar rumah, seperti di warung makan, bukan berarti diet Anda harus gagal. Anda tetap bisa menikmati hidangan lezat dengan menerapkan strategi komposisi piring yang tepat berdasarkan panduan gizi seimbang.</string>
+    <string name="art_warung_strategy_label">Strategi Pintar:</string>
+    <string name="art_warung_strategy_desc" tools:ignore="Spelling">• Nasi: Pilih \'setengah porsi\' untuk memotong kalori.\n• Protein: Utamakan ayam bakar, ikan pepes, atau telur rebus dibanding gorengan.\n• Sayur: Ambil minimal 2 porsi sayuran bening atau urap tanpa kuah santan yang berlebihan.\n• Minum: Selalu pilih air putih atau teh tawar panas untuk menghindari kalori dari gula tambahan.</string>
+    <string name="art_warung_tips">Waspadai kerupuk dan saus kacang. Meskipun terlihat kecil dan sepele, keduanya mengandung kepadatan kalori dan lemak jenuh yang sangat tinggi.</string>
+
+    <string name="art_scan_title">Tips Melakukan Scan Makanan yang Akurat</string>
+    <string name="art_scan_desc">Bantu sistem AI Nutriscan untuk memberikan estimasi kalori dan rincian nutrisi yang paling tepat dengan menerapkan teknik pengambilan foto makanan yang benar sesuai standar analisis citra digital.</string>
+    <string name="art_scan_steps_label">Langkah-langkah Optimal Pengambilan Foto:</string>
+    <string name="art_scan_steps_desc">• Cahaya Terang: Pastikan objek piring tidak tertutup oleh bayangan tubuh Anda sendiri agar detail tekstur makanan terlihat jelas.\n• Sudut 45 Derajat: Ambillah foto dengan posisi kamera sedikit miring (bukan tegak lurus) agar volume dan ketinggian makanan dapat terdeteksi sistem.\n• Tanpa Hambatan: Singkirkan tisu, ponsel lain, atau peralatan makan yang menutupi bagian utama dari komponen makanan Anda.\n• Fokus Tajam: Pastikan tangan Anda tidak goyang agar tekstur makanan (seperti serat sayur atau jenis nasi) terbaca sempurna oleh AI.\n• Jarak Ideal: Jangan terlalu dekat atau terlalu jauh, biarkan piring mengisi sekitar 80% dari frame kamera.</string>
+    <string name="art_scan_tips">Jika piring Anda terlihat terlalu penuh atau bertumpuk, cobalah untuk menyebarkan sedikit makanan tersebut agar AI dapat mengidentifikasi proporsi karbohidrat dan protein yang tertumpuk di bawahnya.</string>
+
+    <string name="art_superfood_title">Daftar Superfood Lokal Kebanggaan Indonesia</string>
+    <string name="art_superfood_desc">Indonesia dianugerahi kekayaan bahan pangan murah dengan profil nutrisi luar biasa yang seringkali melampaui produk impor mewah. Berikut adalah daftar superfood lokal yang harus Anda konsumsi:</string>
+    <string name="art_superfood_list">🍃 Daun Kelor: Memiliki kandungan Vitamin C 7x lebih banyak daripada jeruk dan kalsium 4x lebih banyak daripada susu sapi.\n\n🍱 Tempe: Sumber protein nabati yang sangat lengkap dengan kandungan probiotik alami hasil fermentasi yang sangat baik bagi kesehatan pencernaan Anda.\n\n🐟 Ikan Kembung: Mengandung asam lemak Omega-3 (DHA &amp; EPA) yang terbukti lebih tinggi daripada ikan Salmon, sangat penting untuk kesehatan jantung dan kecerdasan otak.\n\n🍌 Pisang: Sumber kalium yang luar biasa dan karbohidrat yang cepat diserap untuk memberikan energi instan bagi aktivitas otot dan otak.</string>
+    <string name="art_superfood_fact_desc">Sebagai perbandingan, ikan kembung rata-rata memiliki 2.2 gram Omega-3, sementara Salmon rata-rata hanya memiliki 1.9 gram per 100 gram. Mari pilih produk lokal, karena jauh lebih bergizi dan hemat biaya!</string>
+
+    <!-- History & Results Resources -->
+    <string name="title_history">Riwayat Analisis</string>
+    <string name="label_weekly_average">Rata-rata Minggu Ini</string>
+    <string name="value_kcal_template">%s kkal</string>
+    <string name="value_default_kcal">0 kkal</string>
+    <string name="limit_placeholder">2.0k</string>
+    <string name="day_mon">Sen</string>
+    <string name="day_tue">Sel</string>
+    <string name="day_wed">Rab</string>
+    <string name="day_thu">Kam</string>
+    <string name="day_fri">Jum</string>
+    <string name="day_sat">Sab</string>
+    <string name="day_sun">Min</string>
+    <string name="interval_1w">1M</string>
+    <string name="interval_1m">1B</string>
+    <string name="interval_6m">6B</string>
+    <string name="interval_1y">1T</string>
+    <string name="title_nutrition_stats">Statistik Nutrisi</string>
+    <string name="title_daily_notes">Catatan Harian</string>
+    <string name="empty_daily_notes">Belum ada catatan makan hari ini.</string>
+    <string name="title_analysis_result">Analisis Nutrisi</string>
+    <string name="value_kcal_unit">%s kcal</string>
+    <string name="nutrient_ratio_template">%1$dg / %2$dg</string>
+    <string name="title_analysis_detail">Detail Analisis</string>
+    <string name="btn_save_analysis">Simpan Analisis</string>
+    <string name="label_analyzing_food">Sedang Menganalisis Makanan...</string>
+    <string name="btn_add_to_notes">Tambahkan ke Catatan</string>
+    <string name="placeholder_food_name">Ayam Goreng</string>
+    <string name="placeholder_food_stats">260 kcal | P: 22g | K: 5g | L: 17g</string>
+
+    <!-- Favorites & Notifications Resources -->
+    <string name="title_favorites">Favorit Saya</string>
+    <string name="empty_favorites">Belum ada makanan favorit</string>
+    <string name="btn_delete_all">Hapus Semua</string>
+    <string name="btn_delete">Hapus</string>
+    <string name="label_back_to_history">Kembali ke Riwayat Analisis</string>
+    <string name="title_notifications">Notifikasi</string>
+    <string name="empty_notifications">Belum ada notifikasi baru</string>
+    <string name="desc_notifications_empty">Kami akan mengabari Anda jika ada info penting atau pengingat makan harian.</string>
+    <string name="btn_back_to_home">Kembali ke Beranda</string>
+
+    <!-- Settings & Profile Resources -->
+    <string name="title_settings">Pengaturan</string>
+    <string name="label_edit_profile">Edit Profil</string>
+    <string name="label_logout">Keluar</string>
+    <string name="label_dark_mode">Mode Gelap</string>
+    <string name="section_account">Akun Saya</string>
+    <string name="section_goals">Target dan Tujuan</string>
+    <string name="section_preferences">Preferensi</string>
+    <string name="section_info">Informasi</string>
+    <string name="label_daily_calories_target">Target Kalori Harian</string>
+    <string name="label_meal_reminders">Pengingat Makan</string>
+    <string name="label_daily_report">Laporan Harian</string>
+    <string name="label_help_center">Pusat Bantuan</string>
+    <string name="label_app_version">Versi Aplikasi</string>
+    <string name="value_app_version">1.0.0</string>
+    <string name="label_gender">Jenis Kelamin</string>
+    <string name="gender_male">Laki-laki</string>
+    <string name="gender_female">Perempuan</string>
+    <string name="btn_save_changes">Simpan Perubahan</string>
+    <string name="btn_change_photo">Ubah Foto</string>
+    <string name="label_height">Tinggi (cm)</string>
+    <string name="label_weight">Berat (kg)</string>
+    <string name="label_birthdate">Tanggal Lahir</string>
+    <string name="msg_guest_mode">Kamu masuk sebagai Tamu</string>
+    <string name="msg_guest_warning">Data kalori harianmu akan terhapus jika aplikasi ditutup. Yuk, simpan progresmu!</string>
+    <string name="btn_auth_now">Masuk atau Daftar Sekarang</string>
+    <string name="btn_maybe_later">Mungkin Nanti</string>
+
+    <!-- AI Camera Resources -->
+    <string name="title_ai_camera">AI Camera</string>
+    <string name="label_gallery">Gallery</string>
+
+    <!-- Content Descriptions (Accessibility) -->
+    <string name="cd_user_avatar">Avatar Pengguna</string>
+    <string name="cd_notification">Notifikasi</string>
+    <string name="cd_back_button">Kembali</string>
+    <string name="cd_featured_image">Gambar unggulan</string>
+    <string name="cd_icon_edu">Ikon edukasi</string>
+    <string name="cd_nav_home">Home</string>
+    <string name="cd_nav_ai">AI Scanner</string>
+    <string name="cd_nav_history">Riwayat</string>
+    <string name="cd_nav_education">Edukasi</string>
+    <string name="cd_nav_settings">Pengaturan</string>
+    <string name="cd_reset_experiment">Reset Data Nutrisi</string>
+    <string name="cd_view_favorites">Lihat Favorit</string>
+    <string name="cd_icon_profile">Ikon Profil</string>
+    <string name="cd_icon_logout">Ikon Keluar</string>
+    <string name="cd_icon_goal">Ikon Target</string>
+    <string name="cd_icon_reminder">Ikon Pengingat</string>
+    <string name="cd_icon_report">Ikon Laporan</string>
+    <string name="cd_icon_theme">Ikon Tema</string>
+    <string name="cd_icon_help">Ikon Bantuan</string>
+    <string name="cd_google_icon">Ikon Google</string>
+    <string name="cd_scanned_food_image">Gambar makanan yang di-scan</string>
+    <string name="cd_favorite_button">Tambahkan ke favorit</string>
+    <string name="cd_ai_camera">Buka AI Kamera</string>
+    <string name="cd_gallery">Buka Galeri</string>
+    <string name="cd_close_camera">Tutup Kamera</string>
+    <string name="cd_capture_button">Ambil Foto</string>
+</resources>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_home_abstract"
+    android:fitsSystemWindows="true">
+
+    <!-- Header -->
+    <ImageButton
+        android:id="@+id/btn_back_favorites"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/cd_back_button"
+        android:src="@drawable/ic_back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/black_deep" />
+
+    <TextView
+        android:id="@+id/tv_favorites_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:fontFamily="@font/spacelight"
+        android:text="@string/title_favorites"
+        android:textColor="@color/black_deep"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_back_favorites"
+        app:layout_constraintStart_toEndOf="@+id/btn_back_favorites"
+        app:layout_constraintTop_toTopOf="@+id/btn_back_favorites" />
+
+    <!-- Action Icons (Visible in Delete Mode) -->
+    <ImageButton
+        android:id="@+id/btn_check_all"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="12dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/btn_delete_all"
+        android:padding="8dp"
+        android:src="@drawable/ic_check_all"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_back_favorites"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/btn_back_favorites" />
+
+    <ImageButton
+        android:id="@+id/btn_uncheck_all"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/btn_cancel"
+        android:padding="8dp"
+        android:src="@drawable/ic_uncheck_all"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/btn_check_all"
+        app:layout_constraintEnd_toStartOf="@+id/btn_check_all"
+        app:layout_constraintTop_toTopOf="@+id/btn_check_all" />
+
+    <!-- List of Favorites -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_favorites"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="24dp"
+        android:clipToPadding="false"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="24dp"
+        app:layout_constraintBottom_toTopOf="@+id/layout_delete_actions"
+        app:layout_constraintTop_toBottomOf="@+id/tv_favorites_title"
+        tools:listitem="@layout/item_scanned_food" />
+
+    <!-- Delete Actions Container -->
+    <LinearLayout
+        android:id="@+id/layout_delete_actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingHorizontal="32dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/btn_back_to_history">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_delete_selected"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:layout_weight="1"
+            android:background="@drawable/reset_button_background"
+            android:text="@string/btn_delete"
+            android:textAllCaps="false"
+            android:textColor="@color/orange_primary"
+            android:textStyle="bold"
+            app:backgroundTint="@null"
+            app:cornerRadius="25dp"
+            app:strokeWidth="0dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_reset_favorites"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"
+            android:background="@drawable/reset_button_background"
+            android:text="@string/btn_delete_all"
+            android:textAllCaps="false"
+            android:textColor="@color/orange_primary"
+            android:textStyle="bold"
+            app:backgroundTint="@null"
+            app:cornerRadius="25dp"
+            app:strokeWidth="0dp" />
+    </LinearLayout>
+
+    <!-- Back to History Button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btn_back_to_history"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginBottom="64dp"
+        android:fontFamily="@font/spacelight"
+        android:text="@string/label_back_to_history"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        app:backgroundTint="#000000"
+        app:cornerRadius="16dp"
+        app:elevation="4dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Empty State -->
+    <LinearLayout
+        android:id="@+id/empty_favorites_state"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/btn_back_to_history"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_favorites_title"
+        app:layout_constraintVertical_bias="0.45">
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:alpha="0.2"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_favorite_filled" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:fontFamily="@font/spacelight"
+            android:text="@string/empty_favorites"
+            android:textColor="@color/black_soft"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,3 @@
+step 1 : dataset aku pakai gabungan makanan indonesia (5122images)  dan deteksi makanan indonesia (2081 images).
+
+step 2 : makanan indonesia (5122images) punya 6 kelas (ikan mujair, nasi putih, null, tahu goreng, tempe goreng, tumis kangkung). deteksi makanan indonesia (2081 images) punya 12 kelas (Tempe bacem, bakso, bika ambon, dadar gulung, kue cubit, nasi goreng, null, pepes ikan, putu ayu, rendang, sate ayam, telur balado)

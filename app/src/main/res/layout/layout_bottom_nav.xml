@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_navigation_container"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="110dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="35dp"
+    app:cardElevation="8dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:id="@+id/icons_container"
+        android:layout_width="288dp"
+        android:layout_height="53dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <ImageView
+            android:id="@+id/nav_home_icon"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginHorizontal="3dp"
+            android:background="@drawable/nav_item_background_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="10dp"
+            android:src="@drawable/home"
+            app:tint="@color/nav_icon_color_selector" />
+
+        <ImageView
+            android:id="@+id/nav_ai_icon"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginHorizontal="3dp"
+            android:background="@drawable/nav_item_background_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="10dp"
+            android:src="@drawable/scan"
+            app:tint="@color/nav_icon_color_selector" />
+
+        <ImageView
+            android:id="@+id/nav_scan_icon"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginHorizontal="3dp"
+            android:background="@drawable/nav_item_background_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="10dp"
+            android:src="@drawable/statisktik"
+            app:tint="@color/nav_icon_color_selector" />
+
+        <ImageView
+            android:id="@+id/nav_history_icon"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginHorizontal="3dp"
+            android:background="@drawable/nav_item_background_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="10dp"
+            android:src="@drawable/edukasi"
+            app:tint="@color/nav_icon_color_selector" />
+
+        <ImageView
+            android:id="@+id/nav_settings_icon"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginHorizontal="3dp"
+            android:background="@drawable/nav_item_background_selector"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="10dp"
+            android:src="@drawable/settings"
+            app:tint="@color/nav_icon_color_selector" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

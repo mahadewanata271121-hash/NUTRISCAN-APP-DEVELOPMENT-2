@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 1. Background Dasar -->
+    <item>
+        <shape>
+            <solid android:color="#F8F9FA" />
+        </shape>
+    </item>
+
+    <!-- 2. Corak Lingkaran Besar di Pojok Kiri Atas (Identitas Oranye) -->
+    <item android:top="-120dp" android:left="-100dp">
+        <shape android:shape="oval">
+            <size android:width="350dp" android:height="350dp" />
+            <stroke android:width="20dp" android:color="#0DFF5A16" /> <!-- Garis melingkar tebal transparan -->
+        </shape>
+    </item>
+
+    <item android:top="-50dp" android:left="-40dp">
+        <shape android:shape="oval">
+            <size android:width="200dp" android:height="200dp" />
+            <solid android:color="#08FF5A16" />
+        </shape>
+    </item>
+
+    <!-- 3. Corak Garis-Garis Halus (Diagonal Texture) di Sisi Kanan -->
+    <item android:top="150dp" android:right="-50dp">
+        <rotate android:fromDegrees="-45">
+            <shape android:shape="rectangle">
+                <size android:width="2dp" android:height="400dp" />
+                <solid android:color="#0A000000" />
+            </shape>
+        </rotate>
+    </item>
+
+    <item android:top="180dp" android:right="-30dp">
+        <rotate android:fromDegrees="-45">
+            <shape android:shape="rectangle">
+                <size android:width="1dp" android:height="350dp" />
+                <solid android:color="#08000000" />
+            </shape>
+        </rotate>
+    </item>
+
+    <!-- 4. Corak Bentuk Lengkung di Pojok Kanan Bawah (Identitas Biru/Teal) -->
+    <item android:bottom="-80dp" android:right="-60dp">
+        <shape android:shape="oval">
+            <size android:width="250dp" android:height="250dp" />
+            <stroke android:width="1.5dp" android:color="#1A1A9BEF" />
+        </shape>
+    </item>
+
+    <item android:bottom="-40dp" android:right="-30dp">
+        <shape android:shape="oval">
+            <size android:width="150dp" android:height="150dp" />
+            <solid android:color="#0A1A9BEF" />
+        </shape>
+    </item>
+
+</layer-list>

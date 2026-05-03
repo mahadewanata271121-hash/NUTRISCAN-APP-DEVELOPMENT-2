@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Basic Colors -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+
+    <!-- Spektrum Hitam (Soft Black Spectrum) -->
+    <color name="black_deep">#1A1C1E</color>
+    <color name="black_medium">#2D2F31</color>
+    <color name="black_soft">#454749</color>
+
+    <!-- Brand Colors (Nutriscan) -->
+    <color name="orange_primary">#FF5A16</color>
+    <color name="orange_accent">#FF6F43</color>
+    <color name="orange_dark">#CC4912</color>
+    <color name="green_accent">#45C588</color>
+
+    <!-- Fresh Home Card Palette -->
+    <color name="card_calories_bg">#FFF3E0</color>
+    <color name="card_calories_text">#E65100</color>
+    <color name="card_calories_progress_bg">#FFE0B2</color>
+
+    <color name="card_carbs_bg">#E3F2FD</color>
+    <color name="card_carbs_text">#1565C0</color>
+    <color name="card_carbs_progress_bg">#BBDEFB</color>
+
+    <color name="card_protein_bg">#E8F5E9</color>
+    <color name="card_protein_text">#2E7D32</color>
+    <color name="card_protein_progress_bg">#C8E6C9</color>
+
+    <color name="card_purple_bg">#F3E5F5</color>
+    <color name="card_purple_text">#7B1FA2</color>
+
+    <!-- Pastel Day Palette for Progress Bars -->
+    <color name="pastel_senin">#FFCC80</color> <!-- Soft Orange -->
+    <color name="pastel_selasa">#90CAF9</color> <!-- Soft Blue -->
+    <color name="pastel_rabu">#A5D6A7</color> <!-- Soft Green -->
+    <color name="pastel_kamis">#F48FB1</color> <!-- Soft Pink -->
+    <color name="pastel_jumat">#CE93D8</color> <!-- Soft Purple -->
+    <color name="pastel_sabtu">#FFF59D</color> <!-- Soft Yellow -->
+    <color name="pastel_minggu">#80CBC4</color> <!-- Soft Teal/Mint -->
+
+    <!-- Dark Theme Colors -->
+    <color name="background_dark">#1C1C1E</color>
+    <color name="surface_dark">#2C2C2E</color>
+    <color name="text_primary">#EBEBF5</color>
+    <color name="text_secondary">#AEAEB2</color>
+    <color name="text_hint">#98989E</color>
+
+    <!-- Status Colors -->
+    <color name="error_red">#FF5252</color>
+    <color name="blue_link">#3366FF</color>
+
+    <!-- UI Component Colors -->
+    <color name="selected_date_background">#E1D5F5</color>
+    <color name="unselected_date_text">#8A8A8A</color>
+    <color name="date_card_background">#F3EBF9</color>
+
+    <!-- Illustration Palette -->
+    <color name="illu_blue">#1A9BEF</color>
+    <color name="illu_yellow">#FFD131</color>
+    <color name="illu_green_healthy">#4DBB8E</color>
+    <color name="illu_orange_soft">#FF835D</color>
+    <color name="illu_pink">#FF81A3</color>
+    <color name="illu_purple">#9D7CFF</color>
+    <color name="illu_mint">#4CC790</color>
+
+    <!-- Education Card Palette -->
+    <color name="bg_mitos_malam">#FFF3E0</color>
+    <color name="text_mitos_malam">#E65100</color>
+    <color name="bg_mitos_gula">#F3E5F5</color>
+    <color name="text_mitos_gula">#4A148C</color>
+    <color name="bg_porsi_tangan">#E8F5E9</color>
+    <color name="text_porsi_tangan">#2E7D32</color>
+    <color name="bg_warung_tips">#FCE4EC</color>
+    <color name="text_warung_tips">#C2185B</color>
+    <color name="bg_tips_scan">#E1F5FE</color>
+    <color name="text_tips_scan">#0277BD</color>
+
+    <!-- Article Palette -->
+    <color name="bg_protein_gula">#E8F5E9</color>
+    <color name="text_protein_gula">#1B5E20</color>
+    <color name="bg_karbo">#E3F2FD</color>
+    <color name="text_karbo">#0D47A1</color>
+</resources>

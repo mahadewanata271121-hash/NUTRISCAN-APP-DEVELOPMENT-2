@@ -1,0 +1,32 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Nutriscan" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="Theme.Nutriscan" parent="Base.Theme.Nutriscan" />
+
+    <!-- Style Kustom untuk RadioButton Oranye -->
+    <style name="OrangeRadioButtonCap">
+        <item name="colorControlActivated">#FF5A16</item>
+        <item name="colorControlNormal">#454749</item>
+        <item name="android:textColorSecondary">#FF5A16</item>
+    </style>
+
+    <!-- Style Kustom untuk Bottom Navigation -->
+    <style name="CustomBottomNavigationView"
+        parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemIconSize">30dp</item>
+        <item name="itemIconPadding">4dp</item>
+        <item name="android:color">#4D9C27B0</item>
+    </style>
+
+    <!-- Bottom Sheet Dialog Theme -->
+    <style name="BottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CustomBottomSheetStyle</item>
+    </style>
+
+    <style name="CustomBottomSheetStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+</resources>
