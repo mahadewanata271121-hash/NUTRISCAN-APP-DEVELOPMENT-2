@@ -104,11 +104,24 @@
                     android:src="@drawable/illustration22" />
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- TAMPILAN NAMA MAKANAN HASIL AI -->
+            <TextView
+                android:id="@+id/tvDetectedFoodName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="center"
+                android:fontFamily="@font/spacelight"
+                android:textColor="@color/black_deep"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                tools:text="Nasi Goreng" />
+
             <!-- Nutrient Grid -->
             <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="16dp"
                 android:columnCount="2"
                 android:alignmentMode="alignMargins">
 
@@ -212,7 +225,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Save Button (Standardized with Notification Screen) -->
+    <!-- Save Button -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnSaveAnalysis"
         android:layout_width="match_parent"
