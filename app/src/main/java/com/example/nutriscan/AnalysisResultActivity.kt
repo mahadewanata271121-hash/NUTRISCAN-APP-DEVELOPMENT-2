@@ -144,8 +144,10 @@ class AnalysisResultActivity : AppCompatActivity() {
                         currentProt = result.protein
                         currentCarbs = result.carbs
                         currentFat = result.fat
+
                         tvDetectedFoodName?.text = "${result.specificName} (${result.portionWeight})"
-                        updateUI(result.advice)
+                        // PERBAIKAN: Kirim advice DAN healthRisk ke UI
+                        updateUI(result.advice, result.healthRisk)
                     } else {
                         tvAiAdvice?.text = result.errorMsg
                     }
@@ -156,7 +158,7 @@ class AnalysisResultActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUI(advice: String) {
+    private fun updateUI(advice: String, healthRisk: String = "") {
         val userPref = getSharedPreferences("user_data", MODE_PRIVATE)
         val targetCal = userPref.getInt("daily_goal", 2000)
         val tCarbs = userPref.getInt("carbs_goal", (targetCal * 0.50 / 4).toInt())
@@ -164,7 +166,13 @@ class AnalysisResultActivity : AppCompatActivity() {
         val tFat = userPref.getInt("fat_goal", (targetCal * 0.30 / 9).toInt())
 
         tvCalValue?.text = "$currentCal kcal"
-        tvAiAdvice?.text = advice
+        
+        // Gabungkan Saran dan Risiko Kesehatan agar muncul di UI
+        val fullText = if (healthRisk.isNotEmpty()) {
+            "$advice\n\n⚠️ Analisis Risiko:\n$healthRisk"
+        } else advice
+        tvAiAdvice?.text = fullText
+        
         pbProtein?.progress = if (tProt > 0) (currentProt * 100 / tProt).coerceAtMost(100) else 0
         tvProteinValue?.text = "${currentProt}g / ${tProt}g"
         pbCarbs?.progress = if (tCarbs > 0) (currentCarbs * 100 / tCarbs).coerceAtMost(100) else 0
@@ -193,7 +201,6 @@ class AnalysisResultActivity : AppCompatActivity() {
         val currentItemStr = "$safeName|$currentCal|$currentProt|$currentCarbs|$currentFat|$currentImagePath"
 
         if (isFavorite) {
-            // Hapus yang lama dengan nama sama jika ada agar terupdate ke foto terbaru
             items.removeAll { it.startsWith("$safeName|") }
             items.add(0, currentItemStr)
             Toast.makeText(this, "Ditambahkan ke Favorit", Toast.LENGTH_SHORT).show()
@@ -230,7 +237,6 @@ class AnalysisResultActivity : AppCompatActivity() {
         val now = SimpleDateFormat("EEEE, d MMM yyyy • HH:mm", Locale("id", "ID")).format(Date())
         val safeName = currentFoodName.replace("|", "-").replace("#", " ")
         
-        // PERBAIKAN: Selalu tambahkan scan baru ke riwayat agar gambar terupdate
         items.add(0, ScannedFood(safeName, currentCal, currentProt, currentCarbs, currentFat, currentImagePath, now))
         
         val save = items.take(15).joinToString("#") { "${it.name}|${it.cal}|${it.prot}|${it.carbs}|${it.fat}|${it.imagePath}|${it.timestamp}" }
@@ -254,8 +260,6 @@ class AnalysisResultActivity : AppCompatActivity() {
             h.tvName.text = i.name
             h.tvDetails.text = "${i.cal} kcal | P: ${i.prot}g | K: ${i.carbs}g | L: ${i.fat}g"
             h.tvDate.text = i.timestamp
-            
-            // PERBAIKAN: Pemuatan gambar yang lebih handal (mendukung path file dan ID lama)
             loadThumbnail(i.imagePath, h.ivFood)
         }
 
@@ -266,11 +270,8 @@ class AnalysisResultActivity : AppCompatActivity() {
             }
             val file = File(path)
             if (file.exists()) {
-                val options = BitmapFactory.Options().apply {
-                    inJustDecodeBounds = true
-                }
+                val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                 BitmapFactory.decodeFile(path, options)
-                // Scale Down untuk icon agar hemat RAM dan tidak gagal muat
                 var inSampleSize = 1
                 val reqSize = 128
                 if (options.outHeight > reqSize || options.outWidth > reqSize) {
@@ -286,7 +287,6 @@ class AnalysisResultActivity : AppCompatActivity() {
                 if (bitmap != null) iv.setImageBitmap(bitmap)
                 else iv.setImageResource(R.drawable.illustration22)
             } else {
-                // Dukungan data lama yang menyimpan ID resource
                 val id = path.toIntOrNull()
                 if (id != null) iv.setImageResource(id)
                 else iv.setImageResource(R.drawable.illustration22)

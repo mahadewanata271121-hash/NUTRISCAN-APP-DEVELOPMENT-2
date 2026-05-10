@@ -25,6 +25,7 @@ class GeminiNutriService {
         val carbs: Int,
         val fat: Int,
         val advice: String,
+        val healthRisk: String = "",
         val errorMsg: String? = null
     )
 
@@ -38,33 +39,45 @@ class GeminiNutriService {
         val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
 
         if (apiKey.isEmpty()) {
-            return@withContext NutriResponse("", "", 0, 0, 0, 0, "", "[$timestamp] API Key belum diset.")
+            return@withContext NutriResponse("", "", 0, 0, 0, 0, "", "", "[$timestamp] API Key belum diset.")
         }
 
         var scaledBitmap: Bitmap? = null
         try {
             val generativeModel = GenerativeModel(
-                modelName = "gemini-2.5-flash", // PERBAIKAN: Menggunakan versi 2.5 Flash yang stabil
+                modelName = "gemini-2.5-flash", 
                 apiKey = apiKey,
                 generationConfig = generationConfig {
-                    temperature = 0.4f
+                    temperature = 0.1f // Sangat rendah untuk stabilitas format JSON
                     responseMimeType = "application/json"
                 },
-                requestOptions = RequestOptions(timeout = 180.seconds)
+                // PERBAIKAN: Memaksa penggunaan v1beta karena JSON mode (responseMimeType) memerlukan endpoint ini
+                requestOptions = RequestOptions(timeout = 180.seconds, apiVersion = "v1beta")
             )
 
             val prompt = """
-                Analisis makanan: $detectedLabel. Konteks user: $dailyContext.
-                Berikan respon JSON murni tanpa teks tambahan:
+                Bekerjalah sebagai pakar gizi profesional.
+                Target: $detectedLabel.
+                Konteks harian user: $dailyContext.
+                
+                Tugas: Berikan analisis gizi mendalam berdasarkan Tabel Komposisi Pangan Indonesia (TKPI).
+                
+                WAJIB merespon hanya dalam format JSON murni berikut:
                 {
-                  "nama_spesifik": "...",
-                  "berat_porsi": "...",
-                  "kalori": 0,
-                  "protein": 0,
-                  "karbohidrat": 0,
-                  "lemak": 0,
-                  "saran": "..."
+                  "nama_spesifik": "nama lengkap makanan", 
+                  "berat_porsi": "estimasi berat (contoh: 150g)", 
+                  "kalori": 100, 
+                  "protein": 10, 
+                  "karbohidrat": 20, 
+                  "lemak": 5, 
+                  "saran": "saran kesehatan singkat",
+                  "risiko_kesehatan": "analisis singkat risiko kesehatan terkait bahan/porsi"
                 }
+                
+                ATURAN KETAT:
+                1. Field 'kalori', 'protein', 'karbohidrat', 'lemak' HARUS berupa angka murni (integer), dilarang menyertakan teks satuan.
+                2. Field 'risiko_kesehatan' tidak boleh kosong. Analisis risiko terkait kandungan lemak jenuh, gula, garam, atau alergen.
+                3. Jangan sertakan teks apapun di luar blok JSON.
             """.trimIndent()
 
             val imageToUse = bitmap?.let {
@@ -91,30 +104,36 @@ class GeminiNutriService {
             val jsonEnd = responseText.lastIndexOf("}")
 
             if (jsonStart == -1 || jsonEnd == -1 || jsonEnd <= jsonStart) {
-                return@withContext NutriResponse("", "", 0, 0, 0, 0, "", "[$timestamp] AI tidak memberikan format data yang lengkap.")
+                return@withContext NutriResponse("", "", 0, 0, 0, 0, "", "", "[$timestamp] AI gagal memformat data JSON.")
             }
 
             val jsonStr = responseText.substring(jsonStart, jsonEnd + 1)
             val json = JSONObject(jsonStr)
 
+            // Helper parsing angka yang lebih tangguh (alias dukungan nama key bahasa Inggris)
+            fun getSafeInt(keyId: String, keyEn: String): Int {
+                val raw = if (json.has(keyId)) json.optString(keyId) else json.optString(keyEn, "0")
+                return raw.filter { it.isDigit() }.toIntOrNull() ?: 0
+            }
+
             NutriResponse(
                 specificName = json.optString("nama_spesifik", detectedLabel),
                 portionWeight = json.optString("berat_porsi", "1 porsi"),
-                calories = json.optInt("kalori", 0),
-                protein = json.optInt("protein", 0),
-                carbs = json.optInt("karbohidrat", 0),
-                fat = json.optInt("lemak", 0),
-                advice = json.optString("saran", "Analisis selesai.")
+                calories = getSafeInt("kalori", "calories"),
+                protein = getSafeInt("protein", "protein"),
+                carbs = getSafeInt("karbohidrat", "carbohydrates"),
+                fat = getSafeInt("lemak", "fat"),
+                advice = json.optString("saran", "Analisis gizi berhasil."),
+                healthRisk = json.optString("risiko_kesehatan", "Tidak terdeteksi risiko signifikan.")
             )
 
         } catch (t: Throwable) {
             val errMsg = t.message ?: ""
             val userFriendlyMsg = when {
-                errMsg.contains("429") -> "[$timestamp] Terlalu banyak permintaan (Limit API). Tunggu 1 menit."
-                errMsg.contains("timeout") -> "[$timestamp] Koneksi lambat. Coba lagi."
+                errMsg.contains("429") -> "[$timestamp] Terlalu banyak permintaan. Tunggu sebentar."
                 else -> "[$timestamp] Gangguan: ${t.localizedMessage}"
             }
-            NutriResponse("", "", 0, 0, 0, 0, "", userFriendlyMsg)
+            NutriResponse("", "", 0, 0, 0, 0, "", "", userFriendlyMsg)
         } finally {
             if (scaledBitmap != null && scaledBitmap != bitmap) {
                 scaledBitmap?.recycle()

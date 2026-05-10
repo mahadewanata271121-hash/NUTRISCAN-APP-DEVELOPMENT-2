@@ -25,9 +25,9 @@ class MountainChartView @JvmOverloads constructor(
     }
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.LTGRAY; strokeWidth = 2f; style = Paint.Style.STROKE; pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f); alpha = 90
+        color = Color.LTGRAY; strokeWidth = 2f; style = Paint.Style.STROKE; pathEffect = DashPathEffect(floatArrayOf(10f, 10f), 0f); alpha = 40
     }
-    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.GRAY; textSize = 24f }
+    private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.GRAY; textSize = 22f }
     private val boundaryPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { strokeWidth = 3f; style = Paint.Style.STROKE; pathEffect = DashPathEffect(floatArrayOf(15f, 10f), 0f) }
     private val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.BLACK; style = Paint.Style.FILL }
     private val connectorPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.BLACK; strokeWidth = 3f; style = Paint.Style.STROKE; pathEffect = DashPathEffect(floatArrayOf(8f, 8f), 0f) }
@@ -93,13 +93,13 @@ class MountainChartView @JvmOverloads constructor(
         super.onDraw(canvas)
         if (dataPoints.isEmpty()) return
 
-        val pL = 280f; val pR = 60f; val pT = 60f; val pB = 100f
+        val pL = 260f; val pR = 60f; val pT = 60f; val pB = 100f
         val w = width.toFloat() - pL - pR
         val h = height.toFloat() - pT - pB
         if (w <= 0 || h <= 0) return
 
         val maxValueInData = dataPoints.filter { it >= 0 }.maxOrNull() ?: 1f
-        val maxScale = maxOf(maxValueInData, maxGoal, 1f) * 1.3f
+        val maxScale = maxOf(maxValueInData, maxGoal, 1f) * 1.25f
         
         drawGridAndBoundaries(canvas, pL, w, h, pT, maxScale)
         
@@ -115,7 +115,6 @@ class MountainChartView @JvmOverloads constructor(
 
         var latestX = 0f; var latestY = 0f; var latestVal = 0f
         
-        // Start from origin (0 height at the first label position)
         path.moveTo(pL, pT + h)
         fillPath.moveTo(pL, pT + h)
 
@@ -125,7 +124,6 @@ class MountainChartView @JvmOverloads constructor(
             val y = pT + h - (currentVal * scaleY)
 
             val prevX = if (i == 0) pL else pL + ((i - 1) * stepX)
-            // If i=0, prevVal is 0 (origin). If i>0, use previous data point.
             val prevVal = (if (i == 0) 0f else dataPoints[i - 1]) * animationProgress
             val prevY = pT + h - (prevVal * scaleY)
             
@@ -145,11 +143,9 @@ class MountainChartView @JvmOverloads constructor(
             canvas.drawPath(fillPath, fillPaint)
             canvas.drawPath(path, paint)
             
-            // Marker
             canvas.drawLine(latestX, pT + h, latestX, latestY, connectorPaint)
             canvas.drawCircle(latestX, latestY, 12f, dotPaint)
             
-            // Dashed continuation
             if (lastValidIndex < dataPoints.size - 1) {
                 val endX = pL + ((dataPoints.size - 1) * stepX)
                 canvas.drawLine(latestX, pT + h, endX, pT + h, gridPaint)
@@ -182,12 +178,20 @@ class MountainChartView @JvmOverloads constructor(
         val scaleY = height / maxScale
         val unit = if (targetGoal > 500f) "kkal" else "g"
         
-        val step = if (maxScale > 2000) 500f else if (maxScale > 1000) 250f else 100f
+        // PERBAIKAN: Melonggarkan jarak skala agar tetap lega dan nyaman dilihat
+        val step = when {
+            maxScale > 1500 -> 500f // Kalori: Loncat per 500
+            maxScale > 800 -> 250f  // per 250
+            maxScale > 400 -> 100f  // Karbohidrat: per 100
+            maxScale > 100 -> 50f   // Protein/Lemak: per 50
+            else -> 25f
+        }
+        
         var gV = 0f
         while (gV <= maxScale) {
             val y = pT + height - (gV * scaleY)
             canvas.drawLine(pL, y, pL + width, y, gridPaint)
-            textPaint.apply { color = Color.parseColor("#CCCCCC"); textAlign = Paint.Align.RIGHT; typeface = Typeface.DEFAULT }
+            textPaint.apply { color = Color.parseColor("#CCCCCC"); textAlign = Paint.Align.RIGHT; typeface = Typeface.DEFAULT; textSize = 22f }
             canvas.drawText(gV.toInt().toString(), pL - 20f, y + 8f, textPaint)
             gV += step
         }
@@ -197,7 +201,7 @@ class MountainChartView @JvmOverloads constructor(
             val y = pT + height - (v * scaleY)
             boundaryPaint.color = color
             canvas.drawLine(pL, y, pL + width, y, boundaryPaint)
-            textPaint.apply { this.color = color; textAlign = Paint.Align.RIGHT; typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD) }
+            textPaint.apply { this.color = color; textAlign = Paint.Align.RIGHT; typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD); textSize = 24f }
             canvas.drawText("$label (${v.toInt()}$unit)", pL - 20f, y + 8f, textPaint)
         }
 
@@ -205,12 +209,12 @@ class MountainChartView @JvmOverloads constructor(
         drawBoundary(targetGoal, "Goal", Color.parseColor("#2D2F31"))
         drawBoundary(minGoal, "Min", Color.parseColor("#4DBB8E"))
         
-        textPaint.apply { color = Color.parseColor("#AAAAAA"); textAlign = Paint.Align.RIGHT; typeface = Typeface.DEFAULT }
+        textPaint.apply { color = Color.parseColor("#AAAAAA"); textAlign = Paint.Align.RIGHT; typeface = Typeface.DEFAULT; textSize = 22f }
         canvas.drawText("0 (0$unit)", pL - 20f, pT + height + 8f, textPaint)
     }
 
     private fun drawLabels(canvas: Canvas, startX: Float, stepX: Float, h: Float, pT: Float) {
-        textPaint.apply { color = Color.GRAY; textAlign = Paint.Align.CENTER; typeface = Typeface.DEFAULT }
+        textPaint.apply { color = Color.GRAY; textAlign = Paint.Align.CENTER; typeface = Typeface.DEFAULT; textSize = 24f }
         for (i in labels.indices) {
             canvas.drawText(labels[i], startX + (i * stepX), pT + h + 60f, textPaint)
         }

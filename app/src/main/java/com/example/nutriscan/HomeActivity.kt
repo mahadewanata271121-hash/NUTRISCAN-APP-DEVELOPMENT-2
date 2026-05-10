@@ -148,6 +148,7 @@ class HomeActivity : AppCompatActivity() {
         super.onResume()
         checkDataCompleteness()
         updateButtonsVisualState()
+        // Animasi rising diaktifkan setiap kembali ke page ini
         setupCaloriesProgressBar(true)
         setupNutrientsProgressBar(true)
         NavigationHelper.setupBottomNavigation(this, "Home")
@@ -162,7 +163,7 @@ class HomeActivity : AppCompatActivity() {
         progressBar.progressMax = target / 0.76f
         
         if (animate) {
-            // PERBAIKAN: Reset progress ke 0f secara eksplisit agar animasi 'rising' terlihat setiap kali page dibuka kembali
+            // PERBAIKAN: Reset progress ke 0f agar animasi selalu terlihat konsisten
             progressBar.progress = 0f
             ValueAnimator.ofFloat(0f, consumed.coerceAtMost(target)).apply {
                 duration = 1500
@@ -200,6 +201,8 @@ class HomeActivity : AppCompatActivity() {
         tvVal.text = "${consumed.toInt()}g / ${target}g"
 
         if (animate) {
+            // PERBAIKAN: Pastikan bar di-reset ke 0 sebelum animasi dimulai
+            bar.progress = 0
             ValueAnimator.ofInt(0, consumed.toInt().coerceAtMost(target) * 100).apply {
                 duration = 1500
                 addUpdateListener { bar.progress = it.animatedValue as Int }

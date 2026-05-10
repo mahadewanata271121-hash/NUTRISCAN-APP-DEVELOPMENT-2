@@ -176,9 +176,8 @@ class AiCameraActivity : AppCompatActivity() {
                         val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
                         if (bitmap != rotatedBitmap) bitmap.recycle()
                         
-                        runOnUiThread {
-                            navigateToResult(rotatedBitmap, lastDetection ?: "Makanan")
-                        }
+                        // PERBAIKAN: Jalankan proses simpan di background agar tidak freeze
+                        navigateToResult(rotatedBitmap, lastDetection ?: "Makanan")
                     }
                     isProcessing.set(false)
                 }
@@ -226,23 +225,29 @@ class AiCameraActivity : AppCompatActivity() {
     }
 
     private fun navigateToResult(bitmap: Bitmap, foodName: String) {
-        try {
-            val imagesDir = File(filesDir, "food_images").apply { mkdirs() }
-            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US).format(Date())
-            val file = File(imagesDir, "IMG_$timeStamp.jpg")
-            
-            FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 85, it) }
-            
-            val intent = Intent(this, AnalysisResultActivity::class.java).apply {
-                putExtra("IMAGE_PATH", file.absolutePath)
-                putExtra("DETECTED_FOOD", foodName)
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        // PERBAIKAN: Gunakan background executor agar tidak menghambat UI thread
+        cameraExecutor.execute {
+            try {
+                val imagesDir = File(filesDir, "food_images").apply { mkdirs() }
+                val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US).format(Date())
+                val file = File(imagesDir, "IMG_$timeStamp.jpg")
+                
+                FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 85, it) }
+                
+                runOnUiThread {
+                    val intent = Intent(this@AiCameraActivity, AnalysisResultActivity::class.java).apply {
+                        putExtra("IMAGE_PATH", file.absolutePath)
+                        putExtra("DETECTED_FOOD", foodName)
+                        addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    }
+                    startActivity(intent)
+                    bitmap.recycle()
+                    finish()
+                }
+            } catch (e: Exception) {
+                Log.e("AiCamera", "Save error: ${e.message}")
+                bitmap.recycle()
             }
-            startActivity(intent)
-            bitmap.recycle()
-            finish()
-        } catch (e: Exception) {
-            Log.e("AiCamera", "Save error: ${e.message}")
         }
     }
 
