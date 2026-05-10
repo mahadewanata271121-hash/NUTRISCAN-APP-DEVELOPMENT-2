@@ -2,6 +2,7 @@ package com.example.nutriscan
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.*
 import android.widget.*
@@ -13,6 +14,7 @@ import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 class FavoritesActivity : AppCompatActivity() {
 
@@ -85,19 +87,16 @@ class FavoritesActivity : AppCompatActivity() {
             val items = if (favoritesData.isEmpty()) emptyList() else {
                 favoritesData.split("#").filter { it.isNotEmpty() }.mapNotNull {
                     val parts = it.split("|")
-                    try {
-                        // PERBAIKAN: Gunakan toIntOrNull untuk mencegah crash jika data corrupt
-                        if (parts.size >= 5) {
-                            ScannedFood(
-                                parts[0], 
-                                parts[1].toIntOrNull() ?: 0, 
-                                parts[2].toIntOrNull() ?: 0, 
-                                parts[3].toIntOrNull() ?: 0, 
-                                parts[4].toIntOrNull() ?: 0, 
-                                if (parts.size >= 6) parts[5].toIntOrNull() ?: R.drawable.illustration22 else R.drawable.illustration22
-                            )
-                        } else null
-                    } catch (e: Exception) { null }
+                    if (parts.size >= 6) {
+                        ScannedFood(
+                            parts[0], 
+                            parts[1].toIntOrNull() ?: 0, 
+                            parts[2].toIntOrNull() ?: 0, 
+                            parts[3].toIntOrNull() ?: 0, 
+                            parts[4].toIntOrNull() ?: 0, 
+                            parts[5] // imagePath (sebelumnya imageRes)
+                        )
+                    } else null
                 }
             }
 
@@ -163,7 +162,7 @@ class FavoritesActivity : AppCompatActivity() {
         
         lifecycleScope.launch(Dispatchers.IO) {
             val dataToSave = remaining.joinToString("#") { 
-                "${it.name}|${it.cal}|${it.prot}|${it.carbs}|${it.fat}|${it.imageRes}"
+                "${it.name}|${it.cal}|${it.prot}|${it.carbs}|${it.fat}|${it.imagePath}"
             }
             getSharedPreferences("UserStats", Context.MODE_PRIVATE).edit()
                 .putString("favorite_foods", dataToSave).apply()
@@ -184,7 +183,8 @@ class FavoritesActivity : AppCompatActivity() {
         Toast.makeText(this, "Semua favorit telah dihapus", Toast.LENGTH_SHORT).show()
     }
 
-    data class ScannedFood(val name: String, val cal: Int, val prot: Int, val carbs: Int, val fat: Int, val imageRes: Int, var isSelected: Boolean = false)
+    // PERBAIKAN: Gunakan imagePath (String) alih-alih imageRes (Int)
+    data class ScannedFood(val name: String, val cal: Int, val prot: Int, val carbs: Int, val fat: Int, val imagePath: String, var isSelected: Boolean = false)
 
     class FavoritesAdapter(
         private var items: MutableList<ScannedFood>, 
@@ -216,7 +216,9 @@ class FavoritesActivity : AppCompatActivity() {
             val item = items[pos]
             h.tvName.text = item.name
             h.tvDetails.text = "${item.cal} kcal | P: ${item.prot}g | K: ${item.carbs}g"
-            h.ivFood.setImageResource(item.imageRes)
+            
+            // PERBAIKAN: Logika muat gambar yang handal
+            loadThumbnail(item.imagePath, h.ivFood)
             
             h.checkbox.visibility = if (deleteMode) View.VISIBLE else View.GONE
             h.checkbox.setOnCheckedChangeListener(null)
@@ -227,6 +229,38 @@ class FavoritesActivity : AppCompatActivity() {
             }
 
             h.itemView.setOnLongClickListener { onLongPress(); true }
+        }
+
+        private fun loadThumbnail(path: String, iv: ImageView) {
+            if (path.isEmpty()) {
+                iv.setImageResource(R.drawable.illustration22)
+                return
+            }
+            val file = File(path)
+            if (file.exists()) {
+                val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                BitmapFactory.decodeFile(path, options)
+                
+                var inSampleSize = 1
+                val reqSize = 128
+                if (options.outHeight > reqSize || options.outWidth > reqSize) {
+                    val halfHeight = options.outHeight / 2
+                    val halfWidth = options.outWidth / 2
+                    while (halfHeight / inSampleSize >= reqSize && halfWidth / inSampleSize >= reqSize) {
+                        inSampleSize *= 2
+                    }
+                }
+                options.inSampleSize = inSampleSize
+                options.inJustDecodeBounds = false
+                val bitmap = BitmapFactory.decodeFile(path, options)
+                if (bitmap != null) iv.setImageBitmap(bitmap)
+                else iv.setImageResource(R.drawable.illustration22)
+            } else {
+                // Support data lama atau jika string berupa ID resource
+                val id = path.toIntOrNull()
+                if (id != null) iv.setImageResource(id)
+                else iv.setImageResource(R.drawable.illustration22)
+            }
         }
 
         override fun getItemCount() = items.size

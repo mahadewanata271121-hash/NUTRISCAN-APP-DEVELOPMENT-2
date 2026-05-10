@@ -21,6 +21,9 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
@@ -224,8 +227,12 @@ class AiCameraActivity : AppCompatActivity() {
 
     private fun navigateToResult(bitmap: Bitmap, foodName: String) {
         try {
-            val file = File(cacheDir, "scan_res.jpg")
-            FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 80, it) }
+            val imagesDir = File(filesDir, "food_images").apply { mkdirs() }
+            val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmssSSS", Locale.US).format(Date())
+            val file = File(imagesDir, "IMG_$timeStamp.jpg")
+            
+            FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 85, it) }
+            
             val intent = Intent(this, AnalysisResultActivity::class.java).apply {
                 putExtra("IMAGE_PATH", file.absolutePath)
                 putExtra("DETECTED_FOOD", foodName)
@@ -262,7 +269,6 @@ class AiCameraActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        // Matikan penganalisa terlebih dahulu agar tidak ada thread yang mencoba memakai FoodDetector
         isProcessing.set(true) 
         try {
             cameraExecutor.shutdownNow()

@@ -160,8 +160,21 @@ class HomeActivity : AppCompatActivity() {
         val consumed = getSharedPreferences("UserStats", MODE_PRIVATE).getFloat("consumed_calories", 0f)
         
         progressBar.progressMax = target / 0.76f
-        if (animate) progressBar.setProgressWithAnimation(consumed.coerceAtMost(target), 1500)
-        else progressBar.progress = consumed.coerceAtMost(target)
+        
+        if (animate) {
+            // PERBAIKAN: Reset progress ke 0f secara eksplisit agar animasi 'rising' terlihat setiap kali page dibuka kembali
+            progressBar.progress = 0f
+            ValueAnimator.ofFloat(0f, consumed.coerceAtMost(target)).apply {
+                duration = 1500
+                interpolator = DecelerateInterpolator()
+                addUpdateListener { 
+                    progressBar.progress = it.animatedValue as Float 
+                }
+                start()
+            }
+        } else {
+            progressBar.progress = consumed.coerceAtMost(target)
+        }
 
         val color = if (consumed > target) Color.parseColor("#D32F2F") else ContextCompat.getColor(this, R.color.card_calories_text)
         progressBar.progressBarColor = color
@@ -334,7 +347,6 @@ class HomeActivity : AppCompatActivity() {
             dialog.dismiss(); startActivity(Intent(this, Page4Activity::class.java))
         }
         
-        // FIX: Tambahkan listener untuk tombol 'Mungkin Nanti'
         view.findViewById<TextView>(R.id.btn_maybe_later)?.setOnClickListener {
             Toast.makeText(this, "Tetap masuk sebagai tamu.", Toast.LENGTH_SHORT).show()
             dialog.dismiss()

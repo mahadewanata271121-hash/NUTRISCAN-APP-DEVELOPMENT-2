@@ -44,10 +44,10 @@ class GeminiNutriService {
         var scaledBitmap: Bitmap? = null
         try {
             val generativeModel = GenerativeModel(
-                modelName = "gemini-2.0-flash",
+                modelName = "gemini-2.5-flash", // PERBAIKAN: Menggunakan versi 2.5 Flash yang stabil
                 apiKey = apiKey,
                 generationConfig = generationConfig {
-                    temperature = 0.4f // Diturunkan ke 0.4 agar output JSON lebih konsisten/tidak ngawur
+                    temperature = 0.4f
                     responseMimeType = "application/json"
                 },
                 requestOptions = RequestOptions(timeout = 180.seconds)
@@ -87,7 +87,6 @@ class GeminiNutriService {
             val response = generativeModel.generateContent(inputContent)
             val responseText = response.text ?: ""
 
-            // Proteksi Parsing: Ambil hanya bagian di dalam { }
             val jsonStart = responseText.indexOf("{")
             val jsonEnd = responseText.lastIndexOf("}")
 
