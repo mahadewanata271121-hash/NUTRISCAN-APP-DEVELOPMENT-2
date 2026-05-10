@@ -16,6 +16,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        
+        val geminiApiKey: String = project.findProperty("GEMINI_API_KEY") as? String ?: ""
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
     }
 
     buildTypes {
@@ -39,13 +42,13 @@ android {
 
     buildFeatures {
         mlModelBinding = true
+        buildConfig = true
     }
 
     androidResources {
         noCompress += "tflite"
     }
 
-    // Tambahkan ini untuk memperbaiki masalah 16 KB Page Alignment
     packaging {
         jniLibs {
             useLegacyPackaging = true
@@ -63,16 +66,13 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     
-    // Firebase & Auth
     implementation("com.google.android.gms:play-services-auth:21.2.0")
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth-ktx")
     
-    // UI Libraries
     implementation("com.mikhaellopez:circularprogressbar:3.1.0")
 
-    // CameraX
     val camerax_version = "1.4.1"
     implementation("androidx.camera:camera-core:${camerax_version}")
     implementation("androidx.camera:camera-camera2:${camerax_version}")
@@ -80,7 +80,9 @@ dependencies {
     implementation("androidx.camera:camera-view:${camerax_version}")
     implementation("androidx.camera:camera-extensions:${camerax_version}")
 
-    // TensorFlow Lite
     implementation("org.tensorflow:tensorflow-lite:2.14.0")
     implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+
+    // Fixed: Using the latest stable version 0.9.0
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
 }

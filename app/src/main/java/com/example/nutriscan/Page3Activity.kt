@@ -9,7 +9,12 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 
+/**
+ * Page3Activity - Performance Optimized
+ * Menjamin transisi onboarding yang mulus ke halaman Login.
+ */
 class Page3Activity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -17,17 +22,27 @@ class Page3Activity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_page3)
         
+        setupEdgeToEdge()
+        setupListeners()
+    }
+
+    private fun setupEdgeToEdge() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            // Kita set padding bottom ke 0 agar layout tidak didorong ke atas oleh Navigation Bar
-            // Ini akan membuat tampilan di HP sama dengan di Preview Android Studio
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
             insets
         }
+    }
 
-        val getStartedButton = findViewById<FrameLayout>(R.id.get_started_button)
-        getStartedButton.setOnClickListener {
-            val intent = Intent(this, Page4Activity::class.java)
+    private fun setupListeners() {
+        // View Caching untuk respon klik yang instan
+        val btnGetStarted = findViewById<FrameLayout>(R.id.get_started_button)
+        
+        btnGetStarted.setOnClickListener {
+            val intent = Intent(this, Page4Activity::class.java).apply {
+                // Memastikan stack activity tetap bersih
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }

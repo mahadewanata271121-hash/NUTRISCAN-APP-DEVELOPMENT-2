@@ -65,20 +65,20 @@ class ScanningOverlayView @JvmOverloads constructor(
         super.onDraw(canvas)
         if (scanRect.isEmpty) return
 
-        // 1. Gambar Overlay Gelap (4 sisi di luar kotak scanner) - Cara paling stabil
+        // 1. Gambar Overlay Gelap
         paint.color = Color.parseColor("#99000000")
         paint.style = Paint.Style.FILL
         paint.shader = null
         
-        canvas.drawRect(0f, 0f, width.toFloat(), scanRect.top, paint) // Atas
-        canvas.drawRect(0f, scanRect.bottom, width.toFloat(), height.toFloat(), paint) // Bawah
-        canvas.drawRect(0f, scanRect.top, scanRect.left, scanRect.bottom, paint) // Kiri
-        canvas.drawRect(scanRect.right, scanRect.top, width.toFloat(), scanRect.bottom, paint) // Kanan
+        canvas.drawRect(0f, 0f, width.toFloat(), scanRect.top, paint)
+        canvas.drawRect(0f, scanRect.bottom, width.toFloat(), height.toFloat(), paint)
+        canvas.drawRect(0f, scanRect.top, scanRect.left, scanRect.bottom, paint)
+        canvas.drawRect(scanRect.right, scanRect.top, width.toFloat(), scanRect.bottom, paint)
 
-        // 2. Gambar Siku (Corners)
+        // 2. Gambar Siku
         drawCorners(canvas)
 
-        // 3. Gambar Garis Scan & Cahaya
+        // 3. Gambar Garis Scan
         if (scanLineY >= scanRect.top && scanLineY <= scanRect.bottom) {
             canvas.drawLine(scanRect.left, scanLineY, scanRect.right, scanLineY, linePaint)
             
@@ -94,19 +94,18 @@ class ScanningOverlayView @JvmOverloads constructor(
     private fun drawCorners(canvas: Canvas) {
         val len = 60f
         cornerPath.reset()
-        // Top Left
         cornerPath.moveTo(scanRect.left, scanRect.top + len)
         cornerPath.lineTo(scanRect.left, scanRect.top)
         cornerPath.lineTo(scanRect.left + len, scanRect.top)
-        // Top Right
+        
         cornerPath.moveTo(scanRect.right - len, scanRect.top)
         cornerPath.lineTo(scanRect.right, scanRect.top)
         cornerPath.lineTo(scanRect.right, scanRect.top + len)
-        // Bottom Right
+        
         cornerPath.moveTo(scanRect.right, scanRect.bottom - len)
         cornerPath.lineTo(scanRect.right, scanRect.bottom)
         cornerPath.lineTo(scanRect.right - len, scanRect.bottom)
-        // Bottom Left
+        
         cornerPath.moveTo(scanRect.left + len, scanRect.bottom)
         cornerPath.lineTo(scanRect.left, scanRect.bottom)
         cornerPath.lineTo(scanRect.left, scanRect.bottom - len)

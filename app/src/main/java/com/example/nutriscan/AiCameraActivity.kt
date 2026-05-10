@@ -20,7 +20,6 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.util.concurrent.ExecutorService
@@ -38,11 +37,13 @@ class AiCameraActivity : AppCompatActivity() {
     
     private lateinit var tvStatus: TextView
     private lateinit var statusIndicator: View
+    private lateinit var btnCapture: ImageButton
     private var lastDetection: String? = null
     private var isProcessing = AtomicBoolean(false)
     
     private var lastAnalysisTime = 0L
     private val ANALYSIS_INTERVAL_MS = 600L
+    private val STRICT_THRESHOLD = 0.85f
 
     private val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) processGalleryImage(uri)
@@ -55,15 +56,22 @@ class AiCameraActivity : AppCompatActivity() {
         viewFinder = findViewById(R.id.viewFinder)
         tvStatus = findViewById(R.id.tvStatus)
         statusIndicator = findViewById(R.id.statusIndicator)
+        btnCapture = findViewById(R.id.btnCapture)
         
+        btnCapture.isEnabled = false
+        btnCapture.alpha = 0.5f
+
         cameraExecutor = Executors.newSingleThreadExecutor()
         foodDetector = FoodDetector(this)
 
         startCamera()
 
-        findViewById<ImageButton>(R.id.btnCapture).setOnClickListener { 
-            if (!isProcessing.get()) takePhoto() 
+        btnCapture.setOnClickListener {
+            if (lastDetection != null && !isProcessing.get()) {
+                takePhoto()
+            }
         }
+
         findViewById<ImageButton>(R.id.btnClose).setOnClickListener { finish() }
         findViewById<MaterialCardView>(R.id.btnGallery).setOnClickListener {
             if (!isProcessing.get()) {
@@ -128,17 +136,18 @@ class AiCameraActivity : AppCompatActivity() {
             bitmap.recycle()
 
             runOnUiThread {
-                // Ambang batas ditingkatkan ke 0.55 agar lebih akurat dan tidak menebak sembarang objek
-                if (result != null && result.confidence > 0.55f) {
+                if (result != null && result.confidence > STRICT_THRESHOLD) {
                     lastDetection = result.label
-                    val type = if (result.isDrink) "Minuman" else "Makanan"
-                    tvStatus.text = "Terdeteksi: $lastDetection ($type)"
+                    tvStatus.text = "Terdeteksi: $lastDetection"
                     statusIndicator.setBackgroundResource(R.drawable.circle_green)
+                    btnCapture.isEnabled = true
+                    btnCapture.alpha = 1.0f
                 } else {
-                    // Reset deteksi jika tidak yakin agar tidak membawa hasil lama
                     lastDetection = null
                     tvStatus.text = "Objek tidak terdeteksi"
                     statusIndicator.setBackgroundResource(R.drawable.circle_background_grey)
+                    btnCapture.isEnabled = false
+                    btnCapture.alpha = 0.5f
                 }
             }
         } catch (e: Exception) {
@@ -150,9 +159,7 @@ class AiCameraActivity : AppCompatActivity() {
         if (isProcessing.getAndSet(true)) return
         showLoading(true)
 
-        val finalResult = lastDetection
         val imageCapture = imageCapture ?: return
-
         imageCapture.takePicture(
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageCapturedCallback() {
@@ -165,25 +172,9 @@ class AiCameraActivity : AppCompatActivity() {
                     image.close()
                     
                     runOnUiThread {
-                        if (finalResult != null) {
-                            navigateToResult(rotatedBitmap, finalResult)
-                            isProcessing.set(false)
-                            showLoading(false)
-                        } else {
-                            // Cek sekali lagi dengan bitmap yang sudah dirotasi (lebih akurat)
-                            cameraExecutor.execute {
-                                val secondChance = foodDetector.detect(rotatedBitmap)
-                                runOnUiThread {
-                                    showLoading(false)
-                                    isProcessing.set(false)
-                                    if (secondChance != null) {
-                                        navigateToResult(rotatedBitmap, secondChance)
-                                    } else {
-                                        Toast.makeText(this@AiCameraActivity, "Objek tidak terdeteksi", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            }
-                        }
+                        showLoading(false)
+                        navigateToResult(rotatedBitmap, lastDetection ?: "Makanan")
+                        isProcessing.set(false)
                     }
                 }
                 override fun onError(exc: ImageCaptureException) {
@@ -204,12 +195,12 @@ class AiCameraActivity : AppCompatActivity() {
                     val bitmap = BitmapFactory.decodeStream(stream)
                     if (bitmap != null) {
                         val rotated = rotateImageIfRequired(bitmap, uri)
-                        val result = foodDetector.detect(rotated)
+                        val result = foodDetector.analyzeFrame(rotated)
                         runOnUiThread {
                             showLoading(false)
                             isProcessing.set(false)
-                            if (result != null) {
-                                navigateToResult(rotated, result)
+                            if (result != null && result.confidence > STRICT_THRESHOLD) {
+                                navigateToResult(rotated, result.label)
                             } else {
                                 Toast.makeText(this@AiCameraActivity, "Objek tidak terdeteksi", Toast.LENGTH_SHORT).show()
                             }
@@ -220,7 +211,6 @@ class AiCameraActivity : AppCompatActivity() {
                 runOnUiThread { 
                     showLoading(false)
                     isProcessing.set(false)
-                    Toast.makeText(this@AiCameraActivity, "Gagal memproses gambar", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -228,31 +218,26 @@ class AiCameraActivity : AppCompatActivity() {
 
     private fun resetFocusAndExposure() {
         val factory = viewFinder.meteringPointFactory
-        val centerPoint = factory.createPoint(viewFinder.width / 2f, viewFinder.height / 2f)
-        val action = FocusMeteringAction.Builder(centerPoint).build()
-        cameraControl?.startFocusAndMetering(action)
+        val point = factory.createPoint(viewFinder.width / 2f, viewFinder.height / 2f)
+        cameraControl?.startFocusAndMetering(FocusMeteringAction.Builder(point).build())
     }
 
     private fun showLoading(show: Boolean) {
-        runOnUiThread {
-            if (show) {
-                if (progressDialog == null) {
-                    progressDialog = ProgressDialog(this).apply {
-                        setMessage("Menganalisis...")
-                        setCancelable(false)
-                    }
-                }
-                progressDialog?.show()
-            } else {
-                progressDialog?.dismiss()
-                progressDialog = null
+        if (show) {
+            if (progressDialog == null) progressDialog = ProgressDialog(this).apply {
+                setMessage("Menganalisis...")
+                setCancelable(false)
             }
+            progressDialog?.show()
+        } else {
+            progressDialog?.dismiss()
+            progressDialog = null
         }
     }
 
     private fun navigateToResult(bitmap: Bitmap, foodName: String) {
         try {
-            val file = File(cacheDir, "scan_${System.currentTimeMillis()}.jpg")
+            val file = File(cacheDir, "scan_res.jpg")
             FileOutputStream(file).use { bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it) }
             val intent = Intent(this, AnalysisResultActivity::class.java).apply {
                 putExtra("IMAGE_PATH", file.absolutePath)

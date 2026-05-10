@@ -2,6 +2,7 @@ package com.example.nutriscan
 
 import android.os.Bundle
 import android.util.Patterns
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -12,38 +13,35 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 
+/**
+ * ForgotPasswordActivity - Performance Optimized
+ * Fokus pada efisiensi validasi input dan manajemen memori toast.
+ */
 class ForgotPasswordActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var emailInput: EditText
     private lateinit var emailError: TextView
-    private lateinit var sendLinkButton: Button
+    
+    // Memory Cache untuk Toast
+    private var customToast: Toast? = null
+    private var toastTextView: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_forgot_password)
 
         auth = FirebaseAuth.getInstance()
+        bindViews()
+    }
 
+    private fun bindViews() {
         emailInput = findViewById(R.id.email_input)
         emailError = findViewById(R.id.email_error)
-        sendLinkButton = findViewById(R.id.send_link_button)
-
-        val backButton = findViewById<ImageView>(R.id.back_button)
-        backButton.setOnClickListener {
-            finish()
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-        }
-
-        val backToLoginText = findViewById<TextView>(R.id.back_to_login_text)
-        backToLoginText.setOnClickListener {
-            finish()
-            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
-        }
-
-        sendLinkButton.setOnClickListener {
-            sendPasswordResetLink()
-        }
+        
+        findViewById<Button>(R.id.send_link_button).setOnClickListener { sendPasswordResetLink() }
+        findViewById<ImageView>(R.id.back_button).setOnClickListener { finish() }
+        findViewById<TextView>(R.id.back_to_login_text).setOnClickListener { finish() }
     }
 
     private fun sendPasswordResetLink() {
@@ -61,14 +59,25 @@ class ForgotPasswordActivity : AppCompatActivity() {
         auth.sendPasswordResetEmail(email)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Link reset password telah dikirim. Silakan cek email Anda.", Toast.LENGTH_LONG).show()
-                    // Di sini, idealnya Anda akan mengarahkan pengguna ke halaman yang memberitahu mereka untuk memeriksa email,
-                    // atau langsung kembali ke halaman login.
+                    showEfficientToast("Link reset terkirim! Cek email Anda.")
                     finish()
                 } else {
-                    Toast.makeText(this, "Gagal mengirim link: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    showEfficientToast("Gagal: ${task.exception?.message}")
                 }
             }
+    }
+
+    private fun showEfficientToast(message: String) {
+        if (customToast == null) {
+            val layout = LayoutInflater.from(this).inflate(R.layout.custom_toast_layout, null)
+            toastTextView = layout.findViewById(R.id.toast_text)
+            customToast = Toast(applicationContext).apply {
+                duration = Toast.LENGTH_LONG
+                view = layout
+            }
+        }
+        toastTextView?.text = message
+        customToast?.show()
     }
 
     override fun finish() {

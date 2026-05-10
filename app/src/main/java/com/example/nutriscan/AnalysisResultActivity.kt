@@ -1,9 +1,8 @@
 package com.example.nutriscan
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Color
-import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -11,9 +10,11 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.launch
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -27,30 +28,31 @@ class AnalysisResultActivity : AppCompatActivity() {
     private lateinit var tvProteinValue: TextView
     private lateinit var tvCarbsValue: TextView
     private lateinit var tvFatValue: TextView
-    private lateinit var tvAnalysisTimestamp: TextView
+    private lateinit var tvAiAdvice: TextView
     private lateinit var pbProtein: ProgressBar
     private lateinit var pbCarbs: ProgressBar
     private lateinit var pbFat: ProgressBar
     private lateinit var rvScanHistory: RecyclerView
     private lateinit var btnSaveAnalysis: MaterialButton
-    private lateinit var btnBack: ImageButton
     private lateinit var btnFavorite: ImageButton
 
-    private var isFavorite = false
-    private var currentFoodName = "Tidak Terdeteksi"
+    private val geminiService = GeminiNutriService()
+    private var capturedBitmap: Bitmap? = null
+    private var currentFoodName = ""
     private var currentCal = 0
     private var currentProt = 0
     private var currentCarbs = 0
     private var currentFat = 0
+    private var isFavorite = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analysis_result)
 
         initViews()
-        setupAnalysisData()
+        loadLocalData()
+        startSmartAnalysis()
         setupListeners()
-        updateRecentScans()
     }
 
     private fun initViews() {
@@ -60,108 +62,98 @@ class AnalysisResultActivity : AppCompatActivity() {
         tvProteinValue = findViewById(R.id.tvProteinValue)
         tvCarbsValue = findViewById(R.id.tvCarbsValue)
         tvFatValue = findViewById(R.id.tvFatValue)
-        tvAnalysisTimestamp = findViewById(R.id.tvAnalysisTimestamp)
+        tvAiAdvice = findViewById(R.id.tvAiAdvice)
         pbProtein = findViewById(R.id.pbProtein)
         pbCarbs = findViewById(R.id.pbCarbs)
         pbFat = findViewById(R.id.pbFat)
         rvScanHistory = findViewById(R.id.rvScanHistory)
         btnSaveAnalysis = findViewById(R.id.btnSaveAnalysis)
-        btnBack = findViewById(R.id.btnBack)
         btnFavorite = findViewById(R.id.btnFavorite)
-
+        
         rvScanHistory.layoutManager = LinearLayoutManager(this)
-        tvAnalysisTimestamp.text = SimpleDateFormat("EEEE, d MMM yyyy • HH:mm", Locale("id", "ID")).format(Date())
+        findViewById<TextView>(R.id.tvAnalysisTimestamp).text = 
+            SimpleDateFormat("EEEE, d MMM yyyy • HH:mm", Locale("id", "ID")).format(Date())
     }
 
-    private fun setupAnalysisData() {
-        try {
-            // 1. Ambil Nama murni hasil deteksi AI (Clean spaces)
-            currentFoodName = intent.getStringExtra("DETECTED_FOOD")?.trim() ?: "Objek Tidak Dikenali"
-            tvDetectedFoodName.text = currentFoodName.replaceFirstChar { it.uppercase() }
+    private fun loadLocalData() {
+        currentFoodName = intent.getStringExtra("DETECTED_FOOD") ?: "Makanan"
+        tvDetectedFoodName.text = currentFoodName
+        
+        val path = intent.getStringExtra("IMAGE_PATH")
+        if (!path.isNullOrEmpty()) {
+            capturedBitmap = BitmapFactory.decodeFile(path)
+            ivCapturedImage.setImageBitmap(capturedBitmap)
+        }
+    }
 
-            // 2. Ambil Gambar dari Jalur Cache (Anti Crash/Looping)
-            val imagePath = intent.getStringExtra("IMAGE_PATH")
-            if (!imagePath.isNullOrEmpty()) {
-                val imgFile = File(imagePath)
-                if (imgFile.exists()) {
-                    val bitmap = BitmapFactory.decodeFile(imgFile.absolutePath)
-                    ivCapturedImage.setImageBitmap(bitmap)
-                }
+    private fun startSmartAnalysis() {
+        tvAiAdvice.text = "Asisten AI sedang menganalisis porsi dan gizi secara visual..."
+
+        val pref = getSharedPreferences("UserStats", Context.MODE_PRIVATE)
+        val statsPref = getSharedPreferences("user_data", Context.MODE_PRIVATE)
+        
+        val consumedCal = pref.getFloat("consumed_calories", 0f).toInt()
+        val targetCal = statsPref.getInt("daily_goal", 2000)
+        val dailyContext = "User sudah mengonsumsi $consumedCal dari target $targetCal kkal hari ini."
+
+        lifecycleScope.launch {
+            val result = geminiService.getNutritionData(currentFoodName, capturedBitmap, dailyContext)
+            
+            if (result.errorMsg == null) {
+                currentFoodName = result.specificName
+                tvDetectedFoodName.text = "${result.specificName} (${result.portionWeight})"
+                currentCal = result.calories
+                currentProt = result.protein
+                currentCarbs = result.carbs
+                currentFat = result.fat
+                updateUI(result.advice)
+            } else {
+                tvAiAdvice.text = "Gagal: ${result.errorMsg}"
             }
-
-            // 3. Mapping Nutrisi Real (Mendukung 24 Label)
-            mapNutritionData(currentFoodName)
-
-            // 4. Update UI Nutrisi
-            val goalProt = 60
-            val goalCarbs = 300
-            val goalFat = 65
-
-            tvCalValue.text = "$currentCal kcal"
-            setProgressBarColors(pbProtein, Color.BLACK, Color.parseColor("#3D9471"))
-            pbProtein.progress = if (goalProt > 0) (currentProt * 100 / goalProt).coerceAtMost(100) else 0
-            tvProteinValue.text = "${currentProt}g / ${goalProt}g"
-
-            setProgressBarColors(pbCarbs, Color.BLACK, Color.parseColor("#157BBF"))
-            pbCarbs.progress = if (goalCarbs > 0) (currentCarbs * 100 / goalCarbs).coerceAtMost(100) else 0
-            tvCarbsValue.text = "${currentCarbs}g / ${goalCarbs}g"
-
-            setProgressBarColors(pbFat, Color.BLACK, Color.parseColor("#9484D9"))
-            pbFat.progress = if (goalFat > 0) (currentFat * 100 / goalFat).coerceAtMost(100) else 0
-            tvFatValue.text = "${currentFat}g / ${goalFat}g"
-            
-        } catch (e: Exception) {
-            Toast.makeText(this, "Gagal memuat hasil analisis", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private fun mapNutritionData(label: String) {
-        val cleanLabel = label.lowercase().trim()
-        when {
-            // DATA MINUMAN (Real dari AI)
-            cleanLabel.contains("kopi") -> { currentCal = 2; currentProt = 0; currentCarbs = 0; currentFat = 0 }
-            cleanLabel.contains("teh") -> { currentCal = 65; currentProt = 0; currentCarbs = 16; currentFat = 0 }
-            cleanLabel.contains("susu") -> { currentCal = 150; currentProt = 8; currentCarbs = 12; currentFat = 8 }
-            cleanLabel.contains("jus") -> { currentCal = 180; currentProt = 1; currentCarbs = 25; currentFat = 5 }
-            cleanLabel.contains("soda") -> { currentCal = 140; currentProt = 0; currentCarbs = 35; currentFat = 0 }
-            cleanLabel.contains("air") -> { currentCal = 0; currentProt = 0; currentCarbs = 0; currentFat = 0 }
-            cleanLabel.contains("minuman") -> { currentCal = 100; currentProt = 0; currentCarbs = 20; currentFat = 0 }
-            
-            // DATA MAKANAN
-            cleanLabel == "nasi putih" -> { currentCal = 130; currentProt = 2; currentCarbs = 28; currentFat = 0 }
-            cleanLabel == "nasi goreng" -> { currentCal = 250; currentProt = 5; currentCarbs = 30; currentFat = 9 }
-            cleanLabel == "rendang" -> { currentCal = 195; currentProt = 20; currentCarbs = 4; currentFat = 11 }
-            cleanLabel == "bakso" -> { currentCal = 200; currentProt = 12; currentCarbs = 15; currentFat = 10 }
-            cleanLabel == "sate ayam" -> { currentCal = 225; currentProt = 18; currentCarbs = 3; currentFat = 15 }
-            cleanLabel == "tahu goreng" -> { currentCal = 35; currentProt = 2; currentCarbs = 1; currentFat = 3 }
-            cleanLabel == "tempe goreng" -> { currentCal = 50; currentProt = 3; currentCarbs = 2; currentFat = 4 }
-            cleanLabel == "ikan mujair" -> { currentCal = 125; currentProt = 18; currentCarbs = 0; currentFat = 6 }
-            
-            else -> { currentCal = 80; currentProt = 4; currentCarbs = 10; currentFat = 3 }
-        }
-    }
+    private fun updateUI(advice: String) {
+        val sharedPref = getSharedPreferences("user_data", MODE_PRIVATE)
+        val targetCal = sharedPref.getInt("daily_goal", 2000)
+        val targetCarbs = sharedPref.getInt("carbs_goal", (targetCal * 0.55 / 4).toInt())
+        val targetProt = sharedPref.getInt("protein_goal", (targetCal * 0.20 / 4).toInt())
+        val targetFat = sharedPref.getInt("fat_goal", (targetCal * 0.25 / 9).toInt())
 
-    private fun setProgressBarColors(progressBar: ProgressBar, progressColor: Int, backgroundColor: Int) {
-        val drawable = progressBar.progressDrawable?.mutate() as? LayerDrawable ?: return
-        drawable.findDrawableByLayerId(android.R.id.background)?.setTint(backgroundColor)
-        drawable.findDrawableByLayerId(android.R.id.progress)?.setTint(progressColor)
+        tvCalValue.text = "$currentCal kcal"
+        tvAiAdvice.text = advice
+        
+        pbProtein.progress = if (targetProt > 0) (currentProt * 100 / targetProt).coerceAtMost(100) else 0
+        tvProteinValue.text = "${currentProt}g / ${targetProt}g"
+        
+        pbCarbs.progress = if (targetCarbs > 0) (currentCarbs * 100 / targetCarbs).coerceAtMost(100) else 0
+        tvCarbsValue.text = "${currentCarbs}g / ${targetCarbs}g"
+        
+        pbFat.progress = if (targetFat > 0) (currentFat * 100 / targetFat).coerceAtMost(100) else 0
+        tvFatValue.text = "${currentFat}g / ${targetFat}g"
+        
+        updateRecentScans()
     }
 
     private fun setupListeners() {
-        btnBack.setOnClickListener { finish() }
-        btnFavorite.setOnClickListener { 
+        findViewById<ImageButton>(R.id.btnBack).setOnClickListener { finish() }
+        
+        btnFavorite.setOnClickListener {
             isFavorite = !isFavorite
             btnFavorite.setImageResource(if (isFavorite) R.drawable.ic_favorite_filled else R.drawable.ic_favorite_border)
+            Toast.makeText(this, if (isFavorite) "Ditambahkan ke Favorit" else "Dihapus dari Favorit", Toast.LENGTH_SHORT).show()
         }
+
         btnSaveAnalysis.setOnClickListener {
             val pref = getSharedPreferences("UserStats", Context.MODE_PRIVATE)
-            val editor = pref.edit()
-            editor.putFloat("consumed_calories", pref.getFloat("consumed_calories", 0f) + currentCal)
-            editor.putFloat("consumed_protein", pref.getFloat("consumed_protein", 0f) + currentProt)
-            editor.putFloat("consumed_carbs", pref.getFloat("consumed_carbs", 0f) + currentCarbs)
-            editor.putFloat("consumed_fat", pref.getFloat("consumed_fat", 0f) + currentFat)
-            editor.apply()
-            Toast.makeText(this, "Tersimpan di Catatan Harian", Toast.LENGTH_SHORT).show()
+            pref.edit().apply {
+                putFloat("consumed_calories", pref.getFloat("consumed_calories", 0f) + currentCal)
+                putFloat("consumed_protein", pref.getFloat("consumed_protein", 0f) + currentProt)
+                putFloat("consumed_carbs", pref.getFloat("consumed_carbs", 0f) + currentCarbs)
+                putFloat("consumed_fat", pref.getFloat("consumed_fat", 0f) + currentFat)
+                apply()
+            }
+            Toast.makeText(this, "Data gizi disimpan!", Toast.LENGTH_SHORT).show()
             finish()
         }
     }

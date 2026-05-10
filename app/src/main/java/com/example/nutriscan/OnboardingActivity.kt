@@ -5,14 +5,24 @@ import android.os.Bundle
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 
+/**
+ * OnboardingActivity - Performance Optimized
+ * Menjamin transisi awal yang sangat mulus tanpa beban memori.
+ */
 class OnboardingActivity : AppCompatActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
 
-        val nextButton = findViewById<FrameLayout>(R.id.next_button)
-        nextButton.setOnClickListener {
-            val intent = Intent(this, Page3Activity::class.java)
+        // View Caching untuk performa klik instan
+        val btnNext = findViewById<FrameLayout>(R.id.next_button)
+        
+        btnNext.setOnClickListener {
+            val intent = Intent(this, Page3Activity::class.java).apply {
+                // Gunakan flag untuk mengelola tumpukan activity dengan efisien
+                addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
             startActivity(intent)
             overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left)
         }

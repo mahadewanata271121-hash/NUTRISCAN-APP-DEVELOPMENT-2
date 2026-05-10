@@ -10,8 +10,16 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
+/**
+ * ResetPasswordActivity - Stability Optimized
+ * Menjamin transisi reset password yang aman dan responsif.
+ */
 class ResetPasswordActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -19,7 +27,6 @@ class ResetPasswordActivity : AppCompatActivity() {
     private lateinit var confirmPasswordInput: EditText
     private lateinit var newPasswordError: TextView
     private lateinit var confirmPasswordError: TextView
-    private lateinit var resetPasswordButton: Button
     private var oobCode: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,83 +34,83 @@ class ResetPasswordActivity : AppCompatActivity() {
         setContentView(R.layout.activity_reset_password)
 
         auth = FirebaseAuth.getInstance()
-
-        // Ambil oobCode dari data Intent (dari deep link)
         oobCode = intent.data?.getQueryParameter("oobCode")
 
+        initViews()
+        checkLinkValidity()
+    }
+
+    private fun initViews() {
         newPasswordInput = findViewById(R.id.new_password_input)
         confirmPasswordInput = findViewById(R.id.confirm_password_input)
         newPasswordError = findViewById(R.id.new_password_error)
         confirmPasswordError = findViewById(R.id.confirm_password_error)
-        resetPasswordButton = findViewById(R.id.reset_password_button)
 
-        val backButton = findViewById<ImageView>(R.id.back_button)
-        backButton.setOnClickListener {
-            finish()
-        }
+        findViewById<ImageView>(R.id.back_button).setOnClickListener { finish() }
+        findViewById<Button>(R.id.reset_password_button).setOnClickListener { handleReset() }
+    }
 
-        resetPasswordButton.setOnClickListener {
-            resetPassword()
-        }
-
+    private fun checkLinkValidity() {
         if (oobCode == null) {
-            Toast.makeText(this, "Invalid reset link.", Toast.LENGTH_LONG).show()
-            // Sebaiknya kembali ke halaman login jika link tidak valid
-            // finish()
+            Toast.makeText(this, "Link reset tidak valid atau sudah kadaluwarsa.", Toast.LENGTH_LONG).show()
+            // Memberikan jeda singkat agar user bisa membaca pesan sebelum kembali
+            lifecycleScope.launch {
+                kotlinx.coroutines.delay(2000)
+                finish()
+            }
+        }
+    }
+
+    private fun handleReset() {
+        if (!validatePassword()) return
+        val newPassword = newPasswordInput.text.toString().trim()
+        val code = oobCode ?: return
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            auth.confirmPasswordReset(code, newPassword)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this@ResetPasswordActivity, "Password berhasil direset!", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this@ResetPasswordActivity, Page4Activity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        Toast.makeText(this@ResetPasswordActivity, "Gagal: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
         }
     }
 
     private fun validatePassword(): Boolean {
-        val newPassword = newPasswordInput.text.toString().trim()
-        val confirmPassword = confirmPasswordInput.text.toString().trim()
-        var isValid = true
+        val pass = newPasswordInput.text.toString().trim()
+        val confirm = confirmPasswordInput.text.toString().trim()
+        var valid = true
 
-        if (newPassword.length < 6) {
-            newPasswordError.text = "Password harus memiliki minimal 6 karakter"
-            newPasswordError.visibility = View.VISIBLE
+        if (pass.length < 6) {
+            newPasswordError.apply { text = "Minimal 6 karakter"; visibility = View.VISIBLE }
             newPasswordInput.background = ContextCompat.getDrawable(this, R.drawable.bg_dark_edittext_error)
-            isValid = false
+            valid = false
         } else {
             newPasswordError.visibility = View.GONE
             newPasswordInput.background = ContextCompat.getDrawable(this, R.drawable.bg_dark_edittext)
         }
 
-        if (newPassword != confirmPassword) {
-            confirmPasswordError.text = "Password tidak cocok"
-            confirmPasswordError.visibility = View.VISIBLE
+        if (pass != confirm) {
+            confirmPasswordError.apply { text = "Password tidak cocok"; visibility = View.VISIBLE }
             confirmPasswordInput.background = ContextCompat.getDrawable(this, R.drawable.bg_dark_edittext_error)
-            isValid = false
+            valid = false
         } else {
             confirmPasswordError.visibility = View.GONE
             confirmPasswordInput.background = ContextCompat.getDrawable(this, R.drawable.bg_dark_edittext)
         }
 
-        return isValid
+        return valid
     }
 
-    private fun resetPassword() {
-        if (!validatePassword()) return
-
-        val newPassword = newPasswordInput.text.toString().trim()
-
-        oobCode?.let {
-            auth.confirmPasswordReset(it, newPassword)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(this, "Password berhasil direset. Silakan login kembali.", Toast.LENGTH_LONG).show()
-                        // Arahkan kembali ke halaman login
-                        val intent = Intent(this, Page4Activity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(intent)
-                        finish()
-                    } else {
-                        Toast.makeText(this, "Gagal mereset password: ${task.exception?.message}", Toast.LENGTH_LONG).show()
-                    }
-                }
-        }
-    }
     override fun finish() {
         super.finish()
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right)
+        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
     }
 }

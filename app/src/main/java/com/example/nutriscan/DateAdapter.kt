@@ -22,20 +22,13 @@ class DateAdapter(private val dates: List<DateItem>) : RecyclerView.Adapter<Date
         holder.bind(date)
 
         if (date.isSelected) {
-            // 1. Ganti background menjadi OVAL ORANYE
             holder.itemView.setBackgroundResource(R.drawable.bg_date_selected)
-
-            // 2. Ganti warna teks Hari & Tanggal menjadi PUTIH
             holder.dayNameText.setTextColor(Color.WHITE)
             holder.dayNumberText.setTextColor(Color.WHITE)
         } else {
-            // Tampilan saat tidak dipilih
             holder.itemView.setBackgroundColor(Color.TRANSPARENT)
-
-            // Gunakan warna hitam (atau warna sesuai kebutuhan) bukannya Color.GRAY yang fix abu-abu
             val context = holder.itemView.context
             val unselectedColor = ContextCompat.getColor(context, R.color.black)
-
             holder.dayNameText.setTextColor(unselectedColor)
             holder.dayNumberText.setTextColor(unselectedColor)
         }

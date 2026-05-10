@@ -21,7 +21,6 @@ class FoodDetector(context: Context) {
     private var drinkLabels: List<String> = emptyList()
     private val inputSize = 640
 
-    // Optimasi Memori: Pre-allocate objek agar tidak menyebabkan Memory Leak/OOM saat real-time
     private val inputBuffer: ByteBuffer = ByteBuffer.allocateDirect(4 * inputSize * inputSize * 3).apply {
         order(ByteOrder.nativeOrder())
     }
@@ -53,33 +52,21 @@ class FoodDetector(context: Context) {
         }
     }
 
-    /**
-     * Fungsi utama untuk deteksi real-time.
-     * Menggunakan sistem kompetisi dengan bias kategori dan optimasi buffer.
-     */
     @Synchronized
     fun analyzeFrame(bitmap: Bitmap): Recognition? {
         val fInterp = foodInterpreter ?: return null
         val dInterp = drinkInterpreter ?: return null
 
         try {
-            // 1. Persiapkan Gambar ke Buffer (Hemat Memori)
             preprocess(bitmap)
-
-            // 2. Jalankan deteksi makanan
-            // CRITICAL: Rewind buffer ke posisi 0 sebelum dijalankan AI
             inputBuffer.rewind()
             val foodRes = runInference(fInterp, foodLabels, inputBuffer, 0.45f, false)
             
-            // 3. Jalankan deteksi minuman
-            // CRITICAL: Rewind kembali untuk model kedua
             inputBuffer.rewind()
             val drinkRes = runInference(dInterp, drinkLabels, inputBuffer, 0.40f, true)
 
-            // 4. Logika Koordinasi Bias
             return when {
                 foodRes != null && drinkRes != null -> {
-                    // Beri bias +15% ke makanan untuk mencegah Ayam Pop terdeteksi Kopi/Soda
                     if (foodRes.confidence + 0.15f >= drinkRes.confidence) foodRes else drinkRes
                 }
                 foodRes != null -> foodRes
@@ -87,13 +74,11 @@ class FoodDetector(context: Context) {
                 else -> null
             }
         } catch (e: Exception) {
-            Log.e("FoodDetector", "Analysis Error: ${e.message}")
             return null
         }
     }
 
     private fun preprocess(src: Bitmap) {
-        // Gambar ulang ke bitmap berukuran 640x640 dengan padding abu-abu (YOLO style)
         letterboxCanvas.drawColor(Color.rgb(114, 114, 114))
         val scale = inputSize.toFloat() / maxOf(src.width, src.height)
         val w = src.width * scale
@@ -105,7 +90,6 @@ class FoodDetector(context: Context) {
         val dstRect = RectF(left, top, left + w, top + h)
         letterboxCanvas.drawBitmap(src, srcRect, dstRect, paint)
 
-        // Konversi ke Float Buffer
         letterboxBitmap.getPixels(pixels, 0, inputSize, 0, 0, inputSize, inputSize)
         inputBuffer.rewind()
         for (p in pixels) {

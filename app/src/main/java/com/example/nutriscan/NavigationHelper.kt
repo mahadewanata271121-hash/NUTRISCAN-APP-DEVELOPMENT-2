@@ -28,7 +28,6 @@ object NavigationHelper {
         val navItems = listOf(navHome, navAi, navScan, navHistory, navSettings)
         navItems.forEach { it?.isSelected = false }
 
-        // Apply visual state for guests
         if (isGuest) {
             val guestAlpha = 0.4f
             navAi?.alpha = guestAlpha
@@ -78,12 +77,11 @@ object NavigationHelper {
     private fun showGuestRestrictedDialog(activity: AppCompatActivity) {
         AlertDialog.Builder(activity)
             .setTitle("Akses Terbatas")
-            .setMessage("Terima kasih telah mencoba Nutriscan! Mohon maaf, fitur ini merupakan fitur eksklusif bagi pengguna terdaftar agar seluruh progres kesehatan Anda tersimpan secara aman. Silakan buat akun Anda terlebih dahulu untuk menikmati akses penuh.")
+            .setMessage("Silakan buat akun terlebih dahulu untuk menikmati akses penuh.")
             .setPositiveButton("Daftar Sekarang") { _, _ ->
                 activity.startActivity(Intent(activity, RegisterActivity::class.java))
             }
             .setNegativeButton("Nanti Saja", null)
-            .setCancelable(false)
             .show()
     }
 
@@ -96,7 +94,6 @@ object NavigationHelper {
         val intent = Intent(activity, targetClass)
         if (openCamera) intent.putExtra("OPEN_CAMERA", true)
 
-        // Shared Element Transition for Navigation Bar
         val options = if (navContainer != null) {
             ActivityOptions.makeSceneTransitionAnimation(
                 activity,
