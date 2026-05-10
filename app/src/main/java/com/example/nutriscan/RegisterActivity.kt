@@ -1,28 +1,20 @@
 package com.example.nutriscan
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-/**
- * RegisterActivity - Performance Optimized
- * Dioptimalkan untuk interaksi Firebase yang asinkron dan manajemen UI yang ringan.
- */
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -44,12 +36,11 @@ class RegisterActivity : AppCompatActivity() {
         val registerButton = findViewById<Button>(R.id.register_button)
         val backToLogin = findViewById<TextView>(R.id.back_to_login)
 
-        registerButton.setOnClickListener {
+        registerButton?.setOnClickListener {
             handleRegistration(nameInput, emailInput, passwordInput)
         }
 
-        backToLogin.setOnClickListener {
-            // Optimasi: Gunakan FLAG_ACTIVITY_REORDER_TO_FRONT untuk menghemat RAM
+        backToLogin?.setOnClickListener {
             val intent = Intent(this, Page4Activity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
             }
@@ -73,7 +64,6 @@ class RegisterActivity : AppCompatActivity() {
             return
         }
 
-        // Jalankan proses registrasi
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
@@ -83,9 +73,13 @@ class RegisterActivity : AppCompatActivity() {
                         .build()
                     
                     user?.updateProfile(profileUpdates)?.addOnCompleteListener {
+                        // PERBAIKAN: Hapus status tamu jika registrasi berhasil
+                        getSharedPreferences("user_prefs", Context.MODE_PRIVATE).edit()
+                            .remove("skipped_login").apply()
+
                         user.sendEmailVerification().addOnCompleteListener { verifyTask ->
                             if (verifyTask.isSuccessful) {
-                                showEfficientToast("Pendaftaran berhasil! Cek email Anda.")
+                                showEfficientToast("Pendaftaran berhasil! Silakan cek email Anda.")
                                 auth.signOut()
                                 finish()
                             }
@@ -94,22 +88,19 @@ class RegisterActivity : AppCompatActivity() {
                 } else {
                     val exception = task.exception
                     val msg = if (exception is FirebaseAuthUserCollisionException) {
-                        "Email sudah terdaftar. Silakan login."
+                        "Email sudah terdaftar. Silakan gunakan email lain."
                     } else {
-                        exception?.localizedMessage ?: "Pendaftaran gagal"
+                        exception?.localizedMessage ?: "Pendaftaran gagal."
                     }
                     showEfficientToast(msg)
                 }
             }
     }
 
-    /**
-     * showEfficientToast - Mencegah lag akibat pembuatan layout berulang kali
-     */
     private fun showEfficientToast(message: String) {
         if (customToast == null) {
             val layout = LayoutInflater.from(this).inflate(R.layout.custom_toast_layout, null)
-            toastTextView = layout.findViewById(R.id.toast_text)
+            toastTextView = layout?.findViewById(R.id.toast_text)
             customToast = Toast(applicationContext).apply {
                 duration = Toast.LENGTH_SHORT
                 view = layout

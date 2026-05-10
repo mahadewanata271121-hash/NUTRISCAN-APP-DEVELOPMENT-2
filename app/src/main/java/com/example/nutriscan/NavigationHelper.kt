@@ -1,10 +1,12 @@
 package com.example.nutriscan
 
 import android.app.ActivityOptions
+import android.content.Context
 import android.content.Intent
 import android.util.Pair
 import android.view.View
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -21,9 +23,11 @@ object NavigationHelper {
         val navSettings = activity.findViewById<ImageView>(R.id.nav_settings_icon)
         val navContainer = activity.findViewById<View>(R.id.bottom_navigation_container)
 
+        // Konsistensi Pengecekan Tamu
         val auth = FirebaseAuth.getInstance()
         val currentUser = auth.currentUser
-        val isGuest = currentUser == null || currentUser.isAnonymous
+        val sharedPref = activity.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val isGuest = (currentUser == null || currentUser.isAnonymous) || sharedPref.getBoolean("skipped_login", false)
 
         val navItems = listOf(navHome, navAi, navScan, navHistory, navSettings)
         navItems.forEach { it?.isSelected = false }
@@ -33,6 +37,10 @@ object NavigationHelper {
             navAi?.alpha = guestAlpha
             navScan?.alpha = guestAlpha
             navHistory?.alpha = guestAlpha
+        } else {
+            navAi?.alpha = 1.0f
+            navScan?.alpha = 1.0f
+            navHistory?.alpha = 1.0f
         }
 
         when (currentActivity) {
@@ -77,11 +85,15 @@ object NavigationHelper {
     private fun showGuestRestrictedDialog(activity: AppCompatActivity) {
         AlertDialog.Builder(activity)
             .setTitle("Akses Terbatas")
-            .setMessage("Silakan buat akun terlebih dahulu untuk menikmati akses penuh.")
+            .setMessage("Terima kasih telah mencoba Nutriscan! Mohon maaf, fitur ini merupakan fitur eksklusif bagi pengguna terdaftar agar seluruh progres kesehatan Anda tersimpan secara aman. Silakan buat akun Anda terlebih dahulu untuk menikmati akses penuh.")
             .setPositiveButton("Daftar Sekarang") { _, _ ->
                 activity.startActivity(Intent(activity, RegisterActivity::class.java))
             }
-            .setNegativeButton("Nanti Saja", null)
+            .setNegativeButton("Nanti Saja") { dialog, _ ->
+                Toast.makeText(activity, "Fitur ditutup. Daftar nanti untuk akses penuh.", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .setCancelable(false)
             .show()
     }
 

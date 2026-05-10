@@ -14,10 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-/**
- * FavoritesActivity - Performance Optimized
- * Dioptimalkan untuk pengolahan data besar di background agar UI tetap responsif.
- */
 class FavoritesActivity : AppCompatActivity() {
 
     private lateinit var rvFavorites: RecyclerView
@@ -53,21 +49,24 @@ class FavoritesActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        findViewById<ImageButton>(R.id.btn_back_favorites).setOnClickListener { finish() }
+        findViewById<ImageButton>(R.id.btn_back_favorites)?.setOnClickListener { finish() }
 
-        btnBackToHistory.setOnClickListener {
-            startActivity(Intent(this, AnalysisHistoryActivity::class.java).apply {
+        btnBackToHistory?.setOnClickListener {
+            val intent = Intent(this, AnalysisHistoryActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            })
+            }
+            startActivity(intent)
         }
 
-        btnResetFavorites.setOnClickListener { resetAllFavorites() }
-        btnDeleteSelected.setOnClickListener { deleteSelectedFavorites() }
-        btnCheckAll.setOnClickListener { 
+        btnResetFavorites?.setOnClickListener { resetAllFavorites() }
+        btnDeleteSelected?.setOnClickListener { deleteSelectedFavorites() }
+        
+        btnCheckAll?.setOnClickListener { 
             adapter?.selectAll()
             updateDeleteButtonsState()
         }
-        btnUncheckAll.setOnClickListener { 
+        
+        btnUncheckAll?.setOnClickListener { 
             adapter?.unselectAll()
             updateDeleteButtonsState()
         }
@@ -76,11 +75,9 @@ class FavoritesActivity : AppCompatActivity() {
     private fun setupRecyclerView() {
         rvFavorites.layoutManager = LinearLayoutManager(this)
         loadFavorites()
-        setupSwipeGesture()
     }
 
     private fun loadFavorites() {
-        // Optimasi: Load data favorit di Background Thread
         lifecycleScope.launch(Dispatchers.IO) {
             val sharedPref = getSharedPreferences("UserStats", Context.MODE_PRIVATE)
             val favoritesData = sharedPref.getString("favorite_foods", "") ?: ""
@@ -89,10 +86,16 @@ class FavoritesActivity : AppCompatActivity() {
                 favoritesData.split("#").filter { it.isNotEmpty() }.mapNotNull {
                     val parts = it.split("|")
                     try {
-                        if (parts.size >= 6) {
-                            ScannedFood(parts[0], parts[1].toInt(), parts[2].toInt(), parts[3].toInt(), parts[4].toInt(), parts[5].toInt())
-                        } else if (parts.size >= 5) {
-                            ScannedFood(parts[0], parts[1].toInt(), parts[2].toInt(), parts[3].toInt(), parts[4].toInt(), R.drawable.illustration22)
+                        // PERBAIKAN: Gunakan toIntOrNull untuk mencegah crash jika data corrupt
+                        if (parts.size >= 5) {
+                            ScannedFood(
+                                parts[0], 
+                                parts[1].toIntOrNull() ?: 0, 
+                                parts[2].toIntOrNull() ?: 0, 
+                                parts[3].toIntOrNull() ?: 0, 
+                                parts[4].toIntOrNull() ?: 0, 
+                                if (parts.size >= 6) parts[5].toIntOrNull() ?: R.drawable.illustration22 else R.drawable.illustration22
+                            )
                         } else null
                     } catch (e: Exception) { null }
                 }
@@ -109,7 +112,6 @@ class FavoritesActivity : AppCompatActivity() {
             emptyState.visibility = View.VISIBLE
             rvFavorites.visibility = View.GONE
             layoutDeleteActions.visibility = View.GONE
-            exitDeleteMode()
         } else {
             emptyState.visibility = View.GONE
             rvFavorites.visibility = View.VISIBLE
@@ -120,7 +122,6 @@ class FavoritesActivity : AppCompatActivity() {
             } else {
                 adapter?.updateData(items)
             }
-            if (isDeleteMode) enterDeleteMode()
         }
     }
 
@@ -169,7 +170,7 @@ class FavoritesActivity : AppCompatActivity() {
             
             withContext(Dispatchers.Main) {
                 loadFavorites()
-                Toast.makeText(this@FavoritesActivity, "Item dihapus", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@FavoritesActivity, "Item berhasil dihapus", Toast.LENGTH_SHORT).show()
                 if (remaining.isEmpty()) exitDeleteMode()
             }
         }
@@ -180,23 +181,7 @@ class FavoritesActivity : AppCompatActivity() {
             .putString("favorite_foods", "").apply()
         exitDeleteMode()
         loadFavorites()
-        Toast.makeText(this, "Semua favorit dihapus", Toast.LENGTH_SHORT).show()
-    }
-
-    private fun setupSwipeGesture() {
-        val detector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onFling(e1: MotionEvent?, e2: MotionEvent, vx: Float, vy: Float): Boolean {
-                if (e1 != null && e2.x - e1.x > 150 && isDeleteMode) { 
-                    exitDeleteMode()
-                    return true
-                }
-                return false
-            }
-        })
-        rvFavorites.setOnTouchListener { v, event -> 
-            detector.onTouchEvent(event)
-            false 
-        }
+        Toast.makeText(this, "Semua favorit telah dihapus", Toast.LENGTH_SHORT).show()
     }
 
     data class ScannedFood(val name: String, val cal: Int, val prot: Int, val carbs: Int, val fat: Int, val imageRes: Int, var isSelected: Boolean = false)
@@ -219,7 +204,7 @@ class FavoritesActivity : AppCompatActivity() {
         fun updateData(newItems: List<ScannedFood>) {
             this.items.clear()
             this.items.addAll(newItems)
-            notifyDataSetChanged() // Optimasi DiffUtil bisa ditambahkan jika item > 100
+            notifyDataSetChanged()
         }
 
         fun getCurrentItems() = items

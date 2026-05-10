@@ -38,7 +38,7 @@ class HomeActivity : AppCompatActivity() {
     private var isPhysicalDataComplete = false
 
     private val handler = Handler(Looper.getMainLooper())
-    private lateinit var dayProgressRunnable: Runnable
+    private var dayProgressRunnable: Runnable? = null
 
     private val requestCameraPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -53,13 +53,16 @@ class HomeActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         greetingText = findViewById(R.id.greeting_text)
 
-        findViewById<ImageView>(R.id.notification_icon).setOnClickListener {
+        findViewById<ImageView>(R.id.notification_icon)?.setOnClickListener {
             startActivity(Intent(this, NotificationActivity::class.java))
         }
 
-        findViewById<ImageView>(R.id.user_avatar).setOnClickListener {
+        findViewById<ImageView>(R.id.user_avatar)?.setOnClickListener {
             val user = auth.currentUser
-            if (user == null || user.isAnonymous) showGuestProfileSheet()
+            val sharedPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+            val isGuest = (user == null || user.isAnonymous) || sharedPref.getBoolean("skipped_login", false)
+            
+            if (isGuest) showGuestProfileSheet()
             else {
                 startActivity(Intent(this, EditProfileActivity::class.java))
                 overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right)
@@ -91,7 +94,9 @@ class HomeActivity : AppCompatActivity() {
 
     private fun setupGreeting() {
         val name = getSharedPreferences("user_data", Context.MODE_PRIVATE).getString("name", "Dewa")
-        greetingText.text = if (auth.currentUser == null || auth.currentUser!!.isAnonymous) "Selamat Pagi Tamu!" else "Selamat Pagi $name!"
+        val authPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val isGuest = (auth.currentUser == null || auth.currentUser!!.isAnonymous) || authPref.getBoolean("skipped_login", false)
+        greetingText.text = if (isGuest) "Selamat Pagi Tamu!" else "Selamat Pagi $name!"
     }
 
     private fun setupDateRecyclerView() {
@@ -124,10 +129,10 @@ class HomeActivity : AppCompatActivity() {
                 val minutes = (cal.get(Calendar.HOUR_OF_DAY) * 60) + cal.get(Calendar.MINUTE)
                 if (minutes == 0 && progressBar.progress > 1400) animateProgressReset(progressBar)
                 else progressBar.progress = minutes
-                handler.postDelayed(this, 60000)
+                dayProgressRunnable?.let { handler.postDelayed(it, 60000) }
             }
         }
-        handler.post(dayProgressRunnable)
+        dayProgressRunnable?.let { handler.post(it) }
     }
 
     private fun animateProgressReset(progressBar: ProgressBar) {
@@ -167,7 +172,7 @@ class HomeActivity : AppCompatActivity() {
     private fun setupNutrientsProgressBar(animate: Boolean) {
         val sharedPref = getSharedPreferences("user_data", MODE_PRIVATE)
         val targetCal = if (isPhysicalDataComplete) sharedPref.getInt("daily_goal", 2000).toFloat() else 2000f
-        val tCarbs = sharedPref.getInt("carbs_goal", (targetCal * 0.55 / 4).toInt())
+        val tCarbs = sharedPref.getInt("carbs_goal", (targetCal * 0.50 / 4).toInt())
         val tProt = sharedPref.getInt("protein_goal", (targetCal * 0.20 / 4).toInt())
 
         val stats = getSharedPreferences("UserStats", MODE_PRIVATE)
@@ -203,7 +208,8 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun updateButtonsVisualState() {
-        val isGuest = auth.currentUser == null || auth.currentUser!!.isAnonymous
+        val authPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val isGuest = (auth.currentUser == null || auth.currentUser!!.isAnonymous) || authPref.getBoolean("skipped_login", false)
         findViewById<View>(R.id.calories_card)?.alpha = if (isGuest) 0.4f else 1.0f
         findViewById<View>(R.id.nav_ai_icon)?.alpha = if (isPhysicalDataComplete) 1.0f else 0.4f
     }
@@ -211,7 +217,14 @@ class HomeActivity : AppCompatActivity() {
     private fun setupResetButtons() {
         findViewById<View>(R.id.btn_reset_calories)?.setOnClickListener {
             if (isPhysicalDataComplete) {
-                getSharedPreferences("UserStats", MODE_PRIVATE).edit().clear().apply()
+                val pref = getSharedPreferences("UserStats", MODE_PRIVATE)
+                pref.edit().apply {
+                    putFloat("consumed_calories", 0f)
+                    putFloat("consumed_protein", 0f)
+                    putFloat("consumed_carbs", 0f)
+                    putFloat("consumed_fat", 0f)
+                    apply()
+                }
                 setupCaloriesProgressBar(true); setupNutrientsProgressBar(true)
             }
         }
@@ -231,42 +244,102 @@ class HomeActivity : AppCompatActivity() {
 
     private fun checkAndResetDailyData() {
         val pref = getSharedPreferences("UserStats", Context.MODE_PRIVATE)
-        val today = Calendar.getInstance().let { "${it.get(Calendar.YEAR)}-${it.get(Calendar.MONTH)}-${it.get(Calendar.DAY_OF_MONTH)}" }
-        if (pref.getString("last_opened_date", "") != "" && pref.getString("last_opened_date", "") != today) {
-            pref.edit().clear().putString("last_opened_date", today).apply()
-        } else if (pref.getString("last_opened_date", "") == "") pref.edit().putString("last_opened_date", today).apply()
+        val calendar = Calendar.getInstance()
+        val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(calendar.time)
+        val lastOpenedDate = pref.getString("last_opened_date", "")
+
+        if (lastOpenedDate != "" && lastOpenedDate != todayStr) {
+            try {
+                val lastDate = SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(lastOpenedDate)
+                val dayKey = SimpleDateFormat("EEE", Locale.US).format(lastDate!!) 
+                
+                val lastCals = pref.getFloat("consumed_calories", 0f)
+                val lastProt = pref.getFloat("consumed_protein", 0f)
+                val lastCarbs = pref.getFloat("consumed_carbs", 0f)
+                val lastFat = pref.getFloat("consumed_fat", 0f)
+
+                pref.edit().apply {
+                    putFloat("history_cal_$dayKey", lastCals)
+                    putFloat("history_protein_$dayKey", lastProt)
+                    putFloat("history_carbs_$dayKey", lastCarbs)
+                    putFloat("history_fat_$dayKey", lastFat)
+                    
+                    putFloat("consumed_calories", 0f)
+                    putFloat("consumed_protein", 0f)
+                    putFloat("consumed_carbs", 0f)
+                    putFloat("consumed_fat", 0f)
+                    
+                    putString("last_opened_date", todayStr)
+                    apply()
+                }
+            } catch (e: Exception) {
+                pref.edit().putString("last_opened_date", todayStr).apply()
+            }
+        } else if (lastOpenedDate == "") {
+            pref.edit().putString("last_opened_date", todayStr).apply()
+        }
     }
 
     fun handleAiClick() {
-        if (auth.currentUser == null || auth.currentUser!!.isAnonymous) showGuestRestrictedDialog()
+        val authPref = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        val isGuest = (auth.currentUser == null || auth.currentUser!!.isAnonymous) || authPref.getBoolean("skipped_login", false)
+        
+        if (isGuest) showGuestRestrictedDialog()
         else if (!isPhysicalDataComplete) showIncompleteDataDialog()
         else requestCameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
     }
 
     private fun showGuestRestrictedDialog() {
-        AlertDialog.Builder(this).setTitle("Akses Terbatas").setMessage("Silakan buat akun terlebih dahulu.")
-            .setPositiveButton("Daftar") { _, _ -> startActivity(Intent(this, RegisterActivity::class.java)) }
-            .setNegativeButton("Nanti", null).show()
+        AlertDialog.Builder(this)
+            .setTitle("Akses Terbatas")
+            .setMessage("Terima kasih telah mencoba Nutriscan! Mohon maaf, fitur ini merupakan fitur eksklusif bagi pengguna terdaftar agar seluruh progres kesehatan Anda tersimpan secara aman. Silakan buat akun Anda terlebih dahulu untuk menikmati akses penuh.")
+            .setPositiveButton("Daftar Sekarang") { _, _ -> startActivity(Intent(this, RegisterActivity::class.java)) }
+            .setNegativeButton("Nanti Saja") { dialog, _ ->
+                Toast.makeText(this, "Fitur ditutup. Daftar nanti untuk akses penuh.", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .setCancelable(false)
+            .show()
     }
 
     private fun showIncompleteDataDialog() {
-        AlertDialog.Builder(this).setTitle("Data Belum Lengkap").setMessage("Lengkapi data fisik di profil.")
-            .setPositiveButton("Lengkapi") { _, _ -> startActivity(Intent(this, EditProfileActivity::class.java)) }
-            .setNegativeButton("Tutup", null).show()
+        AlertDialog.Builder(this)
+            .setTitle("Data Belum Lengkap!")
+            .setMessage("Lengkapi data fisik di Edit Profil agar kami dapat menghitung kebutuhan gizi harian Anda dengan akurat.")
+            .setPositiveButton("Lengkapi Sekarang") { _, _ -> startActivity(Intent(this, EditProfileActivity::class.java)) }
+            .setNegativeButton("Tutup") { dialog, _ ->
+                Toast.makeText(this, "Fitur AI memerlukan data profil yang lengkap.", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun showInitialNudgeDialog() {
-        AlertDialog.Builder(this).setTitle("Lengkapi Profil").setMessage("Lengkapi data fisik Anda untuk mendapatkan rekomendasi kalori yang personal.")
+        AlertDialog.Builder(this)
+            .setTitle("Halo Nutri-Friends!")
+            .setMessage("Selamat datang di Nutriscan! Agar kami dapat memberikan hitungan kalori dan nutrisi yang presisi sesuai profil biologis Anda, mohon luangkan waktu sebentar untuk melengkapi data fisik di profil ya.")
             .setPositiveButton("Lengkapi Sekarang") { _, _ -> startActivity(Intent(this, EditProfileActivity::class.java)) }
-            .setNegativeButton("Nanti", null).show()
+            .setNegativeButton("Nanti Saja") { dialog, _ ->
+                Toast.makeText(this, "Anda dapat melengkapi data kapan saja melalui menu Profil.", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }
+            .show()
     }
 
     private fun showGuestProfileSheet() {
         val dialog = BottomSheetDialog(this)
         val view = layoutInflater.inflate(R.layout.layout_guest_profile_sheet, null)
-        view.findViewById<MaterialButton>(R.id.btn_login_now).setOnClickListener {
+        
+        view.findViewById<MaterialButton>(R.id.btn_login_now)?.setOnClickListener {
             dialog.dismiss(); startActivity(Intent(this, Page4Activity::class.java))
         }
+        
+        // FIX: Tambahkan listener untuk tombol 'Mungkin Nanti'
+        view.findViewById<TextView>(R.id.btn_maybe_later)?.setOnClickListener {
+            Toast.makeText(this, "Tetap masuk sebagai tamu.", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
         dialog.setContentView(view); dialog.show()
     }
 
@@ -281,9 +354,22 @@ class HomeActivity : AppCompatActivity() {
     private fun showTutorialBottomSheet() {
         val dialog = BottomSheetDialog(this, R.style.BottomSheetDialogTheme)
         val view = layoutInflater.inflate(R.layout.layout_tutorial_sheet, null)
-        view.findViewById<MaterialButton>(R.id.btn_tutorial_next).setOnClickListener {
-            getSharedPreferences("user_data", Context.MODE_PRIVATE).edit().putBoolean("tutorial_shown_${auth.currentUser?.uid}", true).apply()
-            dialog.dismiss()
+        val title = view.findViewById<TextView>(R.id.tv_tutorial_title)
+        val desc = view.findViewById<TextView>(R.id.tv_tutorial_desc)
+        val btnNext = view.findViewById<MaterialButton>(R.id.btn_tutorial_next)
+        var step = 1
+        
+        btnNext?.setOnClickListener {
+            step++
+            when (step) {
+                2 -> { title?.text = "AI Camera Nutriscan"; desc?.text = "Gunakan kamera pintar kami untuk mengenali makanan Anda secara instan." }
+                3 -> { title?.text = "Pantau Progres Anda"; desc?.text = "Lihat perkembangan nutrisi Anda melalui grafik harian." }
+                4 -> { title?.text = "Edukasi Gizi"; desc?.text = "Dapatkan tips kesehatan harian."; btnNext.text = "Mulai Sekarang" }
+                else -> { 
+                    getSharedPreferences("user_data", Context.MODE_PRIVATE).edit().putBoolean("tutorial_shown_${auth.currentUser?.uid}", true).apply()
+                    dialog.dismiss() 
+                }
+            }
         }
         dialog.setContentView(view); dialog.show()
     }
@@ -295,4 +381,9 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun openCamera() = startActivity(Intent(this, AiCameraActivity::class.java))
+
+    override fun onDestroy() {
+        dayProgressRunnable?.let { handler.removeCallbacks(it) }
+        super.onDestroy()
+    }
 }

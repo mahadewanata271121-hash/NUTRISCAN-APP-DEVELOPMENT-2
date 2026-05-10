@@ -12,6 +12,10 @@ import java.util.Locale
 
 class DateAdapter(private val dates: List<DateItem>) : RecyclerView.Adapter<DateAdapter.DateViewHolder>() {
 
+    // Optimasi: Buat formatter satu kali saja (tidak di dalam loop scroll)
+    private val dayNameFormat = SimpleDateFormat("EEE", Locale("id", "ID"))
+    private val dayNumberFormat = SimpleDateFormat("d", Locale.getDefault())
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DateViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_date, parent, false)
         return DateViewHolder(view)
@@ -41,9 +45,6 @@ class DateAdapter(private val dates: List<DateItem>) : RecyclerView.Adapter<Date
         val dayNumberText: TextView = itemView.findViewById(R.id.day_number_text)
 
         fun bind(dateItem: DateItem) {
-            val dayNameFormat = SimpleDateFormat("EEE", Locale("id", "ID"))
-            val dayNumberFormat = SimpleDateFormat("d", Locale.getDefault())
-
             dayNameText.text = dayNameFormat.format(dateItem.date.time)
             dayNumberText.text = dayNumberFormat.format(dateItem.date.time)
         }

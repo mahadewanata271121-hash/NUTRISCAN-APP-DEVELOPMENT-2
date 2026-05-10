@@ -18,18 +18,18 @@ import java.util.Locale
 
 class AnalysisHistoryActivity : AppCompatActivity() {
 
-    private lateinit var caloriesChart: MountainChartView
-    private lateinit var carbsChart: MountainChartView
-    private lateinit var proteinChart: MountainChartView
-    private lateinit var fatChart: MountainChartView
-    private lateinit var toggleGroup: MaterialButtonToggleGroup
+    private var caloriesChart: MountainChartView? = null
+    private var carbsChart: MountainChartView? = null
+    private var proteinChart: MountainChartView? = null
+    private var fatChart: MountainChartView? = null
+    private var toggleGroup: MaterialButtonToggleGroup? = null
 
     private var userBmr: Float = 2000f
     private var carbsTarget: Float = 250f
     private var proteinTarget: Float = 100f
     private var fatTarget: Float = 65f
     private var isVisitor: Boolean = false
-    private var currentMonthOffset = 0 // 0 for Jan-Jun, 1 for Jul-Dec in 6B
+    private var currentMonthOffset = 0 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,8 +45,7 @@ class AnalysisHistoryActivity : AppCompatActivity() {
         }
 
         findViewById<ImageButton>(R.id.btn_view_favorites)?.setOnClickListener {
-            val intent = Intent(this, FavoritesActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, FavoritesActivity::class.java))
         }
     }
 
@@ -58,7 +57,10 @@ class AnalysisHistoryActivity : AppCompatActivity() {
 
     private fun refreshData() {
         val sharedData = getSharedPreferences("user_data", Context.MODE_PRIVATE)
-        isVisitor = sharedData.getBoolean("is_visitor", false)
+        val authData = getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+        
+        isVisitor = authData.getBoolean("skipped_login", false) 
+        
         userBmr = sharedData.getInt("daily_goal", 2000).toFloat()
         carbsTarget = sharedData.getInt("carbs_goal", 250).toFloat()
         proteinTarget = sharedData.getInt("protein_goal", 100).toFloat()
@@ -70,16 +72,17 @@ class AnalysisHistoryActivity : AppCompatActivity() {
         setupBarChart(sharedStats, consumedCal, userBmr)
 
         val tvFoodList = findViewById<TextView>(R.id.tv_food_list)
-        val historyData = sharedStats.getString("daily_food_history", "")
+        val historyData = sharedStats.getString("recent_scans_v2", "")
         if (!historyData.isNullOrEmpty()) {
             val buildTeks = StringBuilder()
             historyData.split("#").forEach { item ->
                 val detail = item.split("|")
-                if (detail.size == 3) {
-                    buildTeks.append("${detail[1]}      ${detail[0]}      ${detail[2]}\n\n")
+                if (detail.size >= 7) {
+                    val dateOnly = detail[6].substringBefore(" •")
+                    buildTeks.append("$dateOnly  ${detail[0]}  (${detail[1]} kkal)\n\n")
                 }
             }
-            tvFoodList?.text = buildTeks.toString()
+            tvFoodList?.text = if (buildTeks.isNotEmpty()) buildTeks.toString() else getString(R.string.empty_daily_notes)
         } else {
             tvFoodList?.text = getString(R.string.empty_daily_notes)
         }
@@ -88,7 +91,7 @@ class AnalysisHistoryActivity : AppCompatActivity() {
     }
 
     private fun updateChartsBySelectedToggle() {
-        val interval = when (toggleGroup.checkedButtonId) {
+        val interval = when (toggleGroup?.checkedButtonId) {
             R.id.btn_1m -> "1B"
             R.id.btn_6m -> "6B"
             R.id.btn_1y -> "1T"
@@ -107,8 +110,8 @@ class AnalysisHistoryActivity : AppCompatActivity() {
         )
         val graphDays = listOf(Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY, Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY)
         val barIds = listOf(R.id.bar_senin, R.id.bar_selasa, R.id.bar_rabu, R.id.bar_kamis, R.id.bar_jumat, R.id.bar_sabtu, R.id.bar_minggu)
-        val textIds = principle_text_ids
-        val limitIds = principle_limit_ids
+        val textIds = listOf(R.id.tv_val_senin, R.id.tv_val_selasa, R.id.tv_val_rabu, R.id.tv_val_kamis, R.id.tv_val_jumat, R.id.tv_val_sabtu, R.id.tv_val_minggu)
+        val limitIds = listOf(R.id.tv_limit_senin, R.id.tv_limit_selasa, R.id.tv_limit_rabu, R.id.tv_limit_kamis, R.id.tv_limit_jumat, R.id.tv_limit_sabtu, R.id.tv_limit_minggu)
 
         var totalCaloriesForAvg = 0f
         var daysWithData = 0
@@ -123,15 +126,12 @@ class AnalysisHistoryActivity : AppCompatActivity() {
                 setupBar(barIds[i], textIds[i], limitIds[i], value, dailyGoal)
                 if (value > 0) { totalCaloriesForAvg += value; daysWithData++ }
             } else {
-                hideBar(barIds[i], textIds[i], dailyGoal)
+                hideBar(barIds[i], textIds[i])
             }
         }
-        val avgCal = if (daysWithData > 0) totalCaloriesForAvg / daysWithData else 0f
+        val avgCal = if (daysWithData > 0) totalCaloriesForAvg / daysWithData else consumedCal
         findViewById<TextView>(R.id.tv_average_total)?.text = String.format(Locale.US, "%,.0f kkal", avgCal)
     }
-
-    private val principle_text_ids = listOf(R.id.tv_val_senin, R.id.tv_val_selasa, R.id.tv_val_rabu, R.id.tv_val_kamis, R.id.tv_val_jumat, R.id.tv_val_sabtu, R.id.tv_val_minggu)
-    private val principle_limit_ids = listOf(R.id.tv_limit_senin, R.id.tv_limit_selasa, R.id.tv_limit_rabu, R.id.tv_limit_kamis, R.id.tv_limit_jumat, R.id.tv_limit_sabtu, R.id.tv_limit_minggu)
 
     private fun setupMountainCharts() {
         caloriesChart = findViewById(R.id.chart_calories)
@@ -142,7 +142,7 @@ class AnalysisHistoryActivity : AppCompatActivity() {
 
     private fun setupIntervalToggle() {
         toggleGroup = findViewById(R.id.interval_toggle_group)
-        toggleGroup.addOnButtonCheckedListener { _, _, isChecked ->
+        toggleGroup?.addOnButtonCheckedListener { _, _, isChecked ->
             if (isChecked) { 
                 currentMonthOffset = 0 
                 updateChartsBySelectedToggle() 
@@ -191,13 +191,11 @@ class AnalysisHistoryActivity : AppCompatActivity() {
                         fatPts.add(stats.getFloat("consumed_fat", 0f))
                     } else if (isPastDay(graphDays[i], today)) {
                         val k = keys[i]
-                        // Real history data (0f if empty)
                         calPts.add(stats.getFloat("history_cal_$k", 0f))
                         carbsPts.add(stats.getFloat("history_carbs_$k", 0f))
                         protPts.add(stats.getFloat("history_protein_$k", 0f))
                         fatPts.add(stats.getFloat("history_fat_$k", 0f))
                     } else {
-                        // Future days: -1f to stop drawing line
                         listOf(calPts, carbsPts, protPts, fatPts).forEach { it.add(-1f) }
                     }
                 }
@@ -212,8 +210,6 @@ class AnalysisHistoryActivity : AppCompatActivity() {
                         protPts.add(stats.getFloat("consumed_protein", 0f))
                         fatPts.add(stats.getFloat("consumed_fat", 0f))
                     } else if (i < currentWeekInMonth) {
-                        // Use 0f for past weeks if no real historical average is available
-                        // This prevents the line from jumping high incorrectly
                         calPts.add(0f); carbsPts.add(0f); protPts.add(0f); fatPts.add(0f)
                     } else {
                         listOf(calPts, carbsPts, protPts, fatPts).forEach { it.add(-1f) }
@@ -234,7 +230,6 @@ class AnalysisHistoryActivity : AppCompatActivity() {
                         protPts.add(stats.getFloat("consumed_protein", 0f))
                         fatPts.add(stats.getFloat("consumed_fat", 0f))
                     } else if (actualMonth < currentMonth) {
-                        // Past months start from 0 if no real history
                         calPts.add(0f); carbsPts.add(0f); protPts.add(0f); fatPts.add(0f)
                     } else {
                         listOf(calPts, carbsPts, protPts, fatPts).forEach { it.add(-1f) }
@@ -260,10 +255,10 @@ class AnalysisHistoryActivity : AppCompatActivity() {
         }
 
         if (labels.isNotEmpty()) {
-            caloriesChart.setData(calPts, labels, ContextCompat.getColor(this, R.color.orange_primary), userBmr * 0.8f, userBmr, userBmr * 1.2f)
-            carbsChart.setData(carbsPts, labels, ContextCompat.getColor(this, R.color.illu_blue), carbsTarget * 0.8f, carbsTarget, carbsTarget * 1.2f)
-            proteinChart.setData(protPts, labels, ContextCompat.getColor(this, R.color.illu_green_healthy), proteinTarget * 0.8f, proteinTarget, proteinTarget * 1.2f)
-            fatChart.setData(fatPts, labels, ContextCompat.getColor(this, R.color.illu_purple), fatTarget * 0.8f, fatTarget, fatTarget * 1.2f)
+            caloriesChart?.setData(calPts, labels, ContextCompat.getColor(this, R.color.orange_primary), userBmr * 0.8f, userBmr, userBmr * 1.2f)
+            carbsChart?.setData(carbsPts, labels, ContextCompat.getColor(this, R.color.illu_blue), carbsTarget * 0.8f, carbsTarget, carbsTarget * 1.2f)
+            proteinChart?.setData(protPts, labels, ContextCompat.getColor(this, R.color.illu_green_healthy), proteinTarget * 0.8f, proteinTarget, proteinTarget * 1.2f)
+            fatChart?.setData(fatPts, labels, ContextCompat.getColor(this, R.color.illu_purple), fatTarget * 0.8f, fatTarget, fatTarget * 1.2f)
         }
     }
 
@@ -274,16 +269,30 @@ class AnalysisHistoryActivity : AppCompatActivity() {
     }
 
     private fun setupBar(barId: Int, textId: Int, limitId: Int, value: Float, dailyGoal: Float) {
-        val bar = findViewById<ProgressBar>(barId); val text = findViewById<TextView>(textId); val limitText = findViewById<TextView>(limitId)
+        val bar = findViewById<ProgressBar>(barId)
+        val text = findViewById<TextView>(textId)
+        val limitText = findViewById<TextView>(limitId)
+        
         val maxVal = if (dailyGoal <= 0) 2000f else dailyGoal
-        limitText?.text = formatLimit(maxVal); bar?.max = (maxVal * 100).toInt()
-        ObjectAnimator.ofInt(bar, "progress", 0, (value * 100).toInt()).apply { duration = 1500; start() }
-        text?.text = formatLimit(value); text?.visibility = View.VISIBLE
+        limitText?.text = formatLimit(maxVal)
+        bar?.max = (maxVal * 100).toInt()
+        
+        // Perbaikan: Pelindung animator agar tidak crash pada objek null
+        bar?.let {
+            ObjectAnimator.ofInt(it, "progress", 0, (value * 100).toInt()).apply { 
+                duration = 1500 
+                start() 
+            }
+        }
+        
+        text?.text = formatLimit(value)
+        text?.visibility = View.VISIBLE
     }
 
-    private fun hideBar(barId: Int, textId: Int, dailyGoal: Float) {
+    private fun hideBar(barId: Int, textId: Int) {
         val bar = findViewById<ProgressBar>(barId)
-        bar?.progress = 0; bar?.alpha = 0.2f
+        bar?.progress = 0
+        bar?.alpha = 0.2f
         findViewById<TextView>(textId)?.visibility = View.INVISIBLE
     }
 

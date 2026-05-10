@@ -38,7 +38,7 @@ class FoodDetector(context: Context) {
     init {
         try {
             val options = Interpreter.Options().apply {
-                setNumThreads(2) 
+                setNumThreads(4)
             }
             foodInterpreter = Interpreter(FileUtil.loadMappedFile(context, "nutriscan_food_float32.tflite"), options)
             foodLabels = FileUtil.loadLabels(context, "labels_food.txt").map { it.trim() }
@@ -46,19 +46,22 @@ class FoodDetector(context: Context) {
             drinkInterpreter = Interpreter(FileUtil.loadMappedFile(context, "nutriscan_drink_float32.tflite"), options)
             drinkLabels = FileUtil.loadLabels(context, "labels_drink.txt").map { it.trim() }
             
-            Log.d("FoodDetector", "Optimized Dual AI Engine Ready.")
+            Log.d("FoodDetector", "AI Engine Initialized Successfully.")
         } catch (e: Exception) {
-            Log.e("FoodDetector", "Init Error: ${e.message}")
+            Log.e("FoodDetector", "Initialization Failed: ${e.message}")
         }
     }
 
     @Synchronized
     fun analyzeFrame(bitmap: Bitmap): Recognition? {
+        // Cek jika interpreter sudah di-close
         val fInterp = foodInterpreter ?: return null
         val dInterp = drinkInterpreter ?: return null
+        if (letterboxBitmap.isRecycled) return null
 
         try {
             preprocess(bitmap)
+            
             inputBuffer.rewind()
             val foodRes = runInference(fInterp, foodLabels, inputBuffer, 0.45f, false)
             
@@ -67,18 +70,21 @@ class FoodDetector(context: Context) {
 
             return when {
                 foodRes != null && drinkRes != null -> {
-                    if (foodRes.confidence + 0.15f >= drinkRes.confidence) foodRes else drinkRes
+                    if (foodRes.confidence + 0.10f >= drinkRes.confidence) foodRes else drinkRes
                 }
                 foodRes != null -> foodRes
                 drinkRes != null -> drinkRes
                 else -> null
             }
         } catch (e: Exception) {
+            Log.e("FoodDetector", "Analysis Error: ${e.message}")
             return null
         }
     }
 
     private fun preprocess(src: Bitmap) {
+        if (letterboxBitmap.isRecycled) return
+        
         letterboxCanvas.drawColor(Color.rgb(114, 114, 114))
         val scale = inputSize.toFloat() / maxOf(src.width, src.height)
         val w = src.width * scale
@@ -98,8 +104,6 @@ class FoodDetector(context: Context) {
             inputBuffer.putFloat((p and 0xFF) / 255f)
         }
     }
-
-    fun detect(bitmap: Bitmap): String? = analyzeFrame(bitmap)?.label
 
     private fun runInference(interp: Interpreter, labels: List<String>, buffer: ByteBuffer, threshold: Float, isDrink: Boolean): Recognition? {
         val shape = interp.getOutputTensor(0).shape()
@@ -137,9 +141,14 @@ class FoodDetector(context: Context) {
         return if (maxIdx != -1) labels[maxIdx] to maxScore else null
     }
 
+    @Synchronized
     fun close() {
         foodInterpreter?.close()
+        foodInterpreter = null
         drinkInterpreter?.close()
-        letterboxBitmap.recycle()
+        drinkInterpreter = null
+        if (!letterboxBitmap.isRecycled) {
+            letterboxBitmap.recycle()
+        }
     }
 }

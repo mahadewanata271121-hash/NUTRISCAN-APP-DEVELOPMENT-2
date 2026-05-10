@@ -10,7 +10,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -21,20 +20,12 @@ import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-/**
- * Page4Activity (Login) - Performance Optimized
- * Menggunakan View Caching dan Async Firebase calls untuk stabilitas maksimal.
- */
 class Page4Activity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
     
-    // View Caching
     private lateinit var emailInput: EditText
     private lateinit var passwordInput: EditText
     private var customToast: Toast? = null
@@ -58,15 +49,15 @@ class Page4Activity : AppCompatActivity() {
         emailInput = findViewById(R.id.email_input)
         passwordInput = findViewById(R.id.password_input)
 
-        findViewById<Button>(R.id.login_button).setOnClickListener { performLogin() }
-        findViewById<Button>(R.id.google_button).setOnClickListener { startGoogleLogin() }
-        findViewById<TextView>(R.id.signup_link).setOnClickListener { 
+        findViewById<Button>(R.id.login_button)?.setOnClickListener { performLogin() }
+        findViewById<Button>(R.id.google_button)?.setOnClickListener { startGoogleLogin() }
+        findViewById<TextView>(R.id.signup_link)?.setOnClickListener { 
             startActivity(Intent(this, RegisterActivity::class.java))
         }
-        findViewById<TextView>(R.id.forgot_password).setOnClickListener { 
+        findViewById<TextView>(R.id.forgot_password)?.setOnClickListener { 
             startActivity(Intent(this, ForgotPasswordActivity::class.java))
         }
-        findViewById<TextView>(R.id.skip_button).setOnClickListener { 
+        findViewById<TextView>(R.id.skip_button)?.setOnClickListener { 
             handleSkipLogin()
         }
     }
@@ -104,10 +95,13 @@ class Page4Activity : AppCompatActivity() {
             return
         }
 
-        // Optimasi: Jalankan auth di context yang tepat
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
+                    // PERBAIKAN: Hapus status tamu jika login berhasil
+                    getSharedPreferences("user_prefs", Context.MODE_PRIVATE).edit()
+                        .remove("skipped_login").apply()
+                        
                     showEfficientToast("Selamat datang kembali!")
                     goToHomeActivity()
                 } else {
@@ -124,7 +118,12 @@ class Page4Activity : AppCompatActivity() {
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential).addOnCompleteListener(this) { task ->
-            if (task.isSuccessful) goToHomeActivity()
+            if (task.isSuccessful) {
+                // PERBAIKAN: Hapus status tamu jika login berhasil
+                getSharedPreferences("user_prefs", Context.MODE_PRIVATE).edit()
+                    .remove("skipped_login").apply()
+                goToHomeActivity()
+            }
             else showEfficientToast("Gagal masuk akun Google.")
         }
     }
@@ -138,7 +137,7 @@ class Page4Activity : AppCompatActivity() {
     private fun showEfficientToast(message: String) {
         if (customToast == null) {
             val layout = LayoutInflater.from(this).inflate(R.layout.custom_toast_layout, null)
-            toastTextView = layout.findViewById(R.id.toast_text)
+            toastTextView = layout?.findViewById(R.id.toast_text)
             customToast = Toast(applicationContext).apply {
                 duration = Toast.LENGTH_SHORT
                 view = layout
@@ -149,7 +148,10 @@ class Page4Activity : AppCompatActivity() {
     }
 
     private fun goToHomeActivity() {
-        startActivity(Intent(this, HomeActivity::class.java))
+        val intent = Intent(this, HomeActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        startActivity(intent)
         finish()
     }
 }
