@@ -213,8 +213,18 @@
                 app:strokeWidth="1dp">
                 <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
                     <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
-                        <ImageView android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/nav_ai_icon" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:fontFamily="@font/spacelight" android:text="Saran Gizi Pintar" android:textColor="#2B6CB0" android:textStyle="bold" android:textSize="15sp" />
+                        <FrameLayout
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/circle_background_grey">
+                            <ImageView
+                                android:layout_width="18dp"
+                                android:layout_height="18dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/ic_smart_ai"
+                                app:tint="#2B6CB0" />
+                        </FrameLayout>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:fontFamily="@font/spacelight" android:text="Saran Gizi Pintar" android:textColor="#2B6CB0" android:textStyle="bold" android:textSize="15sp" />
                     </LinearLayout>
                     <TextView
                         android:id="@+id/tvAiAdvice"

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
+    android:background="@android:color/white"
     android:padding="24dp">
 
     <LinearLayout
@@ -32,7 +32,7 @@
             android:layout_marginTop="8dp"
             android:fontFamily="@font/spacelight"
             android:text="@string/art_warung_title"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="@color/black_deep"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -40,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginVertical="20dp"
-            android:background="?attr/colorSurfaceVariant" />
+            android:background="#EEEEEE" />
 
         <TextView
             android:layout_width="match_parent"
@@ -48,7 +48,7 @@
             android:lineSpacingExtra="6dp"
             android:justificationMode="inter_word"
             android:text="@string/art_warung_desc"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="@color/black_deep"
             android:textSize="15sp" />
 
         <TextView
@@ -56,7 +56,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="@string/art_warung_strategy_label"
-            android:textColor="?android:attr/textColorPrimary"
+            android:textColor="@color/black_deep"
             android:textStyle="bold" />
 
         <TextView
@@ -66,7 +66,7 @@
             android:lineSpacingExtra="4dp"
             android:justificationMode="inter_word"
             android:text="@string/art_warung_strategy_desc"
-            android:textColor="?android:attr/textColorSecondary"
+            android:textColor="@color/black_soft"
             android:textSize="14sp" />
 
         <com.google.android.material.card.MaterialCardView
