@@ -28,6 +28,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.mikhaellopez.circularprogressbar.CircularProgressBar
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 
 class HomeActivity : AppCompatActivity() {
@@ -148,7 +149,6 @@ class HomeActivity : AppCompatActivity() {
         super.onResume()
         checkDataCompleteness()
         updateButtonsVisualState()
-        // Animasi rising diaktifkan setiap kembali ke page ini
         setupCaloriesProgressBar(true)
         setupNutrientsProgressBar(true)
         NavigationHelper.setupBottomNavigation(this, "Home")
@@ -163,7 +163,6 @@ class HomeActivity : AppCompatActivity() {
         progressBar.progressMax = target / 0.76f
         
         if (animate) {
-            // PERBAIKAN: Reset progress ke 0f agar animasi selalu terlihat konsisten
             progressBar.progress = 0f
             ValueAnimator.ofFloat(0f, consumed.coerceAtMost(target)).apply {
                 duration = 1500
@@ -177,8 +176,13 @@ class HomeActivity : AppCompatActivity() {
             progressBar.progress = consumed.coerceAtMost(target)
         }
 
-        val color = if (consumed > target) Color.parseColor("#D32F2F") else ContextCompat.getColor(this, R.color.card_calories_text)
-        progressBar.progressBarColor = color
+        if (consumed > target) {
+            progressBar.progressBarColor = Color.parseColor("#D32F2F")
+            checkAndTriggerAlert("Kalori", consumed, target.toInt())
+        } else {
+            progressBar.progressBarColor = ContextCompat.getColor(this, R.color.card_calories_text)
+        }
+        
         findViewById<TextView>(R.id.calories_text)?.text = consumed.toInt().toString()
         findViewById<TextView>(R.id.max_calories_label)?.text = target.toInt().toString()
     }
@@ -190,18 +194,17 @@ class HomeActivity : AppCompatActivity() {
         val tProt = sharedPref.getInt("protein_goal", (targetCal * 0.20 / 4).toInt())
 
         val stats = getSharedPreferences("UserStats", MODE_PRIVATE)
-        updateNutrientCard(R.id.carbs_card, R.id.carbs_progress, R.id.carbs_value, R.id.carbs_label, stats.getFloat("consumed_carbs", 0f), tCarbs, animate, "#157BBF")
-        updateNutrientCard(R.id.protein_card, R.id.protein_progress, R.id.protein_value, R.id.protein_label, stats.getFloat("consumed_protein", 0f), tProt, animate, "#3D9471")
+        updateNutrientCard("Karbohidrat", R.id.carbs_card, R.id.carbs_progress, R.id.carbs_value, R.id.carbs_label, stats.getFloat("consumed_carbs", 0f), tCarbs, animate, "#157BBF")
+        updateNutrientCard("Protein", R.id.protein_card, R.id.protein_progress, R.id.protein_value, R.id.protein_label, stats.getFloat("consumed_protein", 0f), tProt, animate, "#3D9471")
     }
 
-    private fun updateNutrientCard(cardId: Int, barId: Int, valId: Int, labelId: Int, consumed: Float, target: Int, animate: Boolean, color: String) {
+    private fun updateNutrientCard(name: String, cardId: Int, barId: Int, valId: Int, labelId: Int, consumed: Float, target: Int, animate: Boolean, color: String) {
         val bar = findViewById<ProgressBar>(barId) ?: return
         val tvVal = findViewById<TextView>(valId) ?: return
         bar.max = target * 100
         tvVal.text = "${consumed.toInt()}g / ${target}g"
 
         if (animate) {
-            // PERBAIKAN: Pastikan bar di-reset ke 0 sebelum animasi dimulai
             bar.progress = 0
             ValueAnimator.ofInt(0, consumed.toInt().coerceAtMost(target) * 100).apply {
                 duration = 1500
@@ -210,11 +213,33 @@ class HomeActivity : AppCompatActivity() {
             }
         } else bar.progress = consumed.toInt().coerceAtMost(target) * 100
 
-        val (progressCol, bgCol) = if (consumed > target) Color.parseColor("#D32F2F") to Color.parseColor("#FFCDD2") 
-                                   else Color.BLACK to Color.parseColor(color)
+        val (progressCol, bgCol) = if (consumed > target) {
+            checkAndTriggerAlert(name, consumed, target)
+            Color.parseColor("#D32F2F") to Color.parseColor("#FFCDD2") 
+        } else {
+            Color.BLACK to Color.parseColor(color)
+        }
+        
         (bar.progressDrawable?.mutate() as? LayerDrawable)?.let {
             it.findDrawableByLayerId(android.R.id.background)?.setTint(bgCol)
             it.findDrawableByLayerId(android.R.id.progress)?.setTint(progressCol)
+        }
+    }
+
+    private fun checkAndTriggerAlert(nutrientName: String, consumed: Float, target: Int) {
+        val pref = getSharedPreferences("AlertPrefs", Context.MODE_PRIVATE)
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+        val key = "alert_${nutrientName}_$today"
+        
+        if (!pref.getBoolean(key, false)) {
+            val title = "Peringatan $nutrientName!"
+            val message = "Asupan $nutrientName kamu hari ini (${consumed.toInt()}) sudah melampaui target harian ($target). Yuk, lebih bijak memilih makanan berikutnya!"
+            
+            NotificationStore.saveNotification(this, title, message, "ALERT")
+            pref.edit().putBoolean(key, true).apply()
+            
+            // Show toast for immediate feedback
+            Toast.makeText(this, title, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -243,6 +268,11 @@ class HomeActivity : AppCompatActivity() {
                 }
                 setupCaloriesProgressBar(true); setupNutrientsProgressBar(true)
             }
+        }
+        
+        findViewById<View>(R.id.btn_reset_experiment)?.setOnClickListener {
+             findViewById<View>(R.id.btn_reset_calories)?.performClick()
+             getSharedPreferences("AlertPrefs", MODE_PRIVATE).edit().clear().apply()
         }
     }
 
@@ -370,16 +400,16 @@ class HomeActivity : AppCompatActivity() {
         val dialog = BottomSheetDialog(this, R.style.BottomSheetDialogTheme)
         val view = layoutInflater.inflate(R.layout.layout_tutorial_sheet, null)
         val title = view.findViewById<TextView>(R.id.tv_tutorial_title)
-        val desc = view.findViewById<TextView>(R.id.tv_tutorial_desc)
+        val description = view.findViewById<TextView>(R.id.tv_tutorial_desc)
         val btnNext = view.findViewById<MaterialButton>(R.id.btn_tutorial_next)
         var step = 1
         
         btnNext?.setOnClickListener {
             step++
             when (step) {
-                2 -> { title?.text = "AI Camera Nutriscan"; desc?.text = "Gunakan kamera pintar kami untuk mengenali makanan Anda secara instan." }
-                3 -> { title?.text = "Pantau Progres Anda"; desc?.text = "Lihat perkembangan nutrisi Anda melalui grafik harian." }
-                4 -> { title?.text = "Edukasi Gizi"; desc?.text = "Dapatkan tips kesehatan harian."; btnNext.text = "Mulai Sekarang" }
+                2 -> { title?.text = "AI Camera Nutriscan"; description?.text = "Gunakan kamera pintar kami untuk mengenali makanan Anda secara instan." }
+                3 -> { title?.text = "Pantau Progres Anda"; description?.text = "Lihat perkembangan nutrisi Anda melalui grafik harian." }
+                4 -> { title?.text = "Edukasi Gizi"; description?.text = "Dapatkan tips kesehatan harian."; btnNext.text = "Mulai Sekarang" }
                 else -> { 
                     getSharedPreferences("user_data", Context.MODE_PRIVATE).edit().putBoolean("tutorial_shown_${auth.currentUser?.uid}", true).apply()
                     dialog.dismiss() 

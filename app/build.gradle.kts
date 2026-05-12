@@ -93,4 +93,7 @@ dependencies {
 
     // Menggunakan Google AI SDK dari version catalog
     implementation(libs.google.generativeai)
+    
+    // Gson for JSON parsing
+    implementation(libs.gson)
 }

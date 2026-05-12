@@ -1,14 +1,20 @@
 package com.example.nutriscan
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.materialswitch.MaterialSwitch
@@ -18,6 +24,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class SettingsActivity : AppCompatActivity() {
+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            enableReminders(true)
+        } else {
+            Toast.makeText(this, "Izin notifikasi ditolak. Pengingat tidak bisa muncul.", Toast.LENGTH_LONG).show()
+            findViewById<MaterialSwitch>(R.id.switch_reminders)?.isChecked = false
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,7 +75,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        setupPlaceholderSwitches()
+        setupActiveSwitches()
 
         findViewById<ImageButton>(R.id.btn_back_settings)?.setOnClickListener {
             finish()
@@ -81,7 +98,6 @@ class SettingsActivity : AppCompatActivity() {
             .setMessage("Apakah Anda yakin ingin keluar?")
             .setPositiveButton("Ya") { _, _ ->
                 auth.signOut()
-                // Reset status tamu saat logout agar sistem bersih
                 getSharedPreferences("user_prefs", Context.MODE_PRIVATE).edit().clear().apply()
                 
                 val intent = Intent(this, Page4Activity::class.java).apply {
@@ -94,25 +110,65 @@ class SettingsActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun setupPlaceholderSwitches() {
-        val switches = listOf<MaterialSwitch?>(
-            findViewById(R.id.switch_theme),
-            findViewById(R.id.switch_reminders),
-            findViewById(R.id.switch_daily_report)
-        )
-
-        val showNotice = {
-            Toast.makeText(this, "Fitur ini akan segera hadir!", Toast.LENGTH_SHORT).show()
+    private fun setupActiveSwitches() {
+        val sharedPref = getSharedPreferences("SettingsPref", Context.MODE_PRIVATE)
+        
+        // Mode Gelap
+        val switchTheme = findViewById<MaterialSwitch>(R.id.switch_theme)
+        val isDarkMode = sharedPref.getBoolean("isDarkMode", false)
+        switchTheme?.isChecked = isDarkMode
+        switchTheme?.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked != sharedPref.getBoolean("isDarkMode", false)) {
+                sharedPref.edit().putBoolean("isDarkMode", isChecked).apply()
+                if (isChecked) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                }
+            }
         }
 
-        switches.forEach { s ->
-            s?.isEnabled = false
-            s?.isClickable = false
+        // Pengingat Makan
+        val switchReminders = findViewById<MaterialSwitch>(R.id.switch_reminders)
+        val isReminderOn = sharedPref.getBoolean("isReminderOn", false)
+        switchReminders?.isChecked = isReminderOn
+        
+        switchReminders?.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                checkNotificationPermission()
+            } else {
+                enableReminders(false)
+            }
         }
 
-        findViewById<LinearLayout>(R.id.container_reminders)?.setOnClickListener { showNotice() }
-        findViewById<LinearLayout>(R.id.container_daily_report)?.setOnClickListener { showNotice() }
-        findViewById<LinearLayout>(R.id.container_theme)?.setOnClickListener { showNotice() }
+        // Laporan Harian
+        val switchDailyReport = findViewById<MaterialSwitch>(R.id.switch_daily_report)
+        switchDailyReport?.isEnabled = false
+    }
+
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                enableReminders(true)
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        } else {
+            enableReminders(true)
+        }
+    }
+
+    private fun enableReminders(enable: Boolean) {
+        val sharedPref = getSharedPreferences("SettingsPref", Context.MODE_PRIVATE)
+        sharedPref.edit().putBoolean("isReminderOn", enable).apply()
+        
+        if (enable) {
+            ReminderManager.scheduleAllReminders(this)
+            Toast.makeText(this, "Pengingat Makan aktif", Toast.LENGTH_SHORT).show()
+        } else {
+            ReminderManager.cancelAllReminders(this)
+            Toast.makeText(this, "Pengingat dimatikan", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onResume() {

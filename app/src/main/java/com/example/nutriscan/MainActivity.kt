@@ -12,7 +12,6 @@ import android.text.style.ForegroundColorSpan
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.auth.FirebaseAuth
@@ -21,15 +20,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val sharedPref = getSharedPreferences("SettingsPref", MODE_PRIVATE)
-        val isDarkMode = sharedPref.getBoolean("isDarkMode", false)
-
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
+        
+        // Logika Tema sudah ditangani di NutriscanApp.kt secara global
 
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
